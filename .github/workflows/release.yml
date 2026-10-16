@@ -1,0 +1,75 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag name for release (e.g. v1.0.0)'
+        required: false
+        default: 'v1.0.0'
+
+jobs:
+  build_release:
+    name: Build & Publish macOS DMGs
+    runs-on: macos-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run code analysis
+        run: flutter analyze
+
+      - name: Run test suite
+        run: flutter test
+
+      - name: Build macOS app (Release)
+        run: flutter build macos --release
+
+      - name: Package macOS DMGs (Apple Silicon & Intel)
+        run: |
+          chmod +x ./scripts/package_macos_dmg.sh
+          ./scripts/package_macos_dmg.sh
+
+      - name: Determine Release Tag
+        id: release_tag
+        run: |
+          if [ -n "${{ github.event.inputs.tag_name }}" ]; then
+            echo "tag=${{ github.event.inputs.tag_name }}" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=v1.0.0" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release_tag.outputs.tag }}
+          name: LingoDiff Studio ${{ steps.release_tag.outputs.tag }}
+          files: |
+            dist/LingoDiff-macOS-arm64.dmg
+            dist/LingoDiff-macOS-x86_64.dmg
+            dist/LingoDiff-macOS-universal.dmg
+            dist/SHA256SUMS.txt
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

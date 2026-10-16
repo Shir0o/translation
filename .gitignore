@@ -32,6 +32,8 @@ migrate_working_dir/
 .pub/
 /build/
 /coverage/
+/dist/
+*.dmg
 
 # Symbolication related
 app.*.symbols

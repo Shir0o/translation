@@ -649,7 +649,7 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                     letterSpacing: 0.5,
                   ),
                 ),
-                if (trailing != null) trailing,
+                ?trailing,
               ],
             ),
           ),

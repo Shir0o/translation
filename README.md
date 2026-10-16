@@ -74,6 +74,20 @@ flutter build macos --release
 ```
 The compiled application will be located at `build/macos/Build/Products/Release/translation.app`.
 
+### Packaging macOS Disk Images (.dmg)
+
+To package standalone `.dmg` installers for Apple Silicon (M chips), Intel (x86_64), and Universal systems:
+
+```bash
+./scripts/package_macos_dmg.sh
+```
+
+Packaged installers and SHA256 checksums will be generated in `dist/`:
+- `LingoDiff-macOS-arm64.dmg` (Apple Silicon M1/M2/M3/M4)
+- `LingoDiff-macOS-x86_64.dmg` (Intel x86_64)
+- `LingoDiff-macOS-universal.dmg` (Universal binary)
+- `SHA256SUMS.txt`
+
 ---
 
 ## Configuration

@@ -286,7 +286,7 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
                   : ListView.separated(
                       padding: const EdgeInsets.all(16),
                       itemCount: widget.lessons.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      separatorBuilder: (_, _) => const SizedBox(height: 12),
                       itemBuilder: (context, idx) {
                         final item = widget.lessons[idx];
                         return _buildLessonCard(item);
