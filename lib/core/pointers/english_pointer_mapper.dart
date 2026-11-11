@@ -40,12 +40,9 @@ class EnglishPointerMapper {
           for (var k = matchIdx; k < endIdx; k++) {
             occupied[k] = true;
           }
-          located.add(PointerSegment(
-            index: i,
-            start: matchIdx,
-            end: endIdx,
-            text: seg,
-          ));
+          located.add(
+            PointerSegment(index: i, start: matchIdx, end: endIdx, text: seg),
+          );
           break; // move to next segment
         } else {
           searchStart = matchIdx + 1;

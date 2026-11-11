@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+
 import '../../core/pointers/english_pointer_mapper.dart';
 import '../../models/critique_model.dart';
 
@@ -64,14 +65,16 @@ class _InteractiveEnglishViewState extends State<InteractiveEnglishView> {
     for (final ptr in locatedPointers) {
       // Plain text before this pointer
       if (ptr.start > lastIndex) {
-        spans.add(TextSpan(
-          text: widget.englishText.substring(lastIndex, ptr.start),
-          style: const TextStyle(
-            color: Color(0xFFCBD5E1),
-            fontSize: 15,
-            height: 1.6,
+        spans.add(
+          TextSpan(
+            text: widget.englishText.substring(lastIndex, ptr.start),
+            style: const TextStyle(
+              color: Color(0xFFCBD5E1),
+              fontSize: 15,
+              height: 1.6,
+            ),
           ),
-        ));
+        );
       }
 
       final critique = widget.critiques[ptr.index];
@@ -81,38 +84,43 @@ class _InteractiveEnglishViewState extends State<InteractiveEnglishView> {
         ..onTap = () => widget.onPointerSelected(ptr.index);
       _recognizers.add(tapRecognizer);
 
-      final (badgeBg, borderCol, textCol) = _getCategoryColors(critique.category, isActive);
+      final (badgeBg, borderCol, textCol) = _getCategoryColors(
+        critique.category,
+        isActive,
+      );
 
-      spans.add(TextSpan(
-        text: ' [#${ptr.index + 1} ${ptr.text}] ',
-        recognizer: tapRecognizer,
-        style: TextStyle(
-          color: isActive ? const Color(0xFF38BDF8) : textCol,
-          backgroundColor: isActive ? const Color(0x6638BDF8) : badgeBg,
-          fontWeight: FontWeight.bold,
-          fontSize: 14,
-          height: 1.8,
+      spans.add(
+        TextSpan(
+          text: ' [#${ptr.index + 1} ${ptr.text}] ',
+          recognizer: tapRecognizer,
+          style: TextStyle(
+            color: isActive ? const Color(0xFF38BDF8) : textCol,
+            backgroundColor: isActive ? const Color(0x6638BDF8) : badgeBg,
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+            height: 1.8,
+          ),
         ),
-      ));
+      );
 
       lastIndex = ptr.end;
     }
 
     // Remaining trailing text
     if (lastIndex < widget.englishText.length) {
-      spans.add(TextSpan(
-        text: widget.englishText.substring(lastIndex),
-        style: const TextStyle(
-          color: Color(0xFFCBD5E1),
-          fontSize: 15,
-          height: 1.6,
+      spans.add(
+        TextSpan(
+          text: widget.englishText.substring(lastIndex),
+          style: const TextStyle(
+            color: Color(0xFFCBD5E1),
+            fontSize: 15,
+            height: 1.6,
+          ),
         ),
-      ));
+      );
     }
 
-    return Text.rich(
-      TextSpan(children: spans),
-    );
+    return Text.rich(TextSpan(children: spans));
   }
 
   (Color bg, Color border, Color text) _getCategoryColors(

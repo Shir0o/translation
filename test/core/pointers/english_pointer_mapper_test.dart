@@ -11,7 +11,7 @@ void main() {
         'I have been looking for a new apartment for three months',
         'fits my budget',
         'I realized that',
-        'on rent'
+        'on rent',
       ];
 
       final pointers = EnglishPointerMapper.locatePointers(fullText, segments);
@@ -20,7 +20,10 @@ void main() {
       // Pointer 0
       final p0 = pointers.firstWhere((p) => p.index == 0);
       expect(p0.start, equals(0));
-      expect(p0.text, equals('I have been looking for a new apartment for three months'));
+      expect(
+        p0.text,
+        equals('I have been looking for a new apartment for three months'),
+      );
 
       // Check that substrings match exactly
       for (final p in pointers) {
@@ -30,7 +33,10 @@ void main() {
 
     test('prevents overlapping segment collisions', () {
       const text = 'Repeat word word word end';
-      final pointers = EnglishPointerMapper.locatePointers(text, ['word', 'word']);
+      final pointers = EnglishPointerMapper.locatePointers(text, [
+        'word',
+        'word',
+      ]);
       expect(pointers.length, equals(2));
       expect(pointers[0].start != pointers[1].start, isTrue);
     });

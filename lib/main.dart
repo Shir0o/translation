@@ -58,6 +58,9 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
   final _aiService = AITutorService();
   final _lessonsRepo = LessonsRepository();
 
+  /// Below this logical width the workspace panes stack into one column.
+  static const double _stackedPaneBreakpoint = 700;
+
   bool _isThreeColumn = false;
   bool _isOfficialBlurred = false;
   bool _isEnglishInteractive = false;
@@ -81,7 +84,9 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
     final lessons = await _lessonsRepo.loadLessons();
     final prefs = await SharedPreferences.getInstance();
 
-    final provider = AIProvider.fromString(prefs.getString('lingodiff_provider'));
+    final provider = AIProvider.fromString(
+      prefs.getString('lingodiff_provider'),
+    );
     final key = prefs.getString('lingodiff_api_key') ?? '';
     final model = prefs.getString('lingodiff_model') ?? provider.defaultModel;
 
@@ -168,13 +173,17 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
     final officialEs = _officialSpanishController.text.trim();
 
     if (enText.isEmpty || userEs.isEmpty) {
-      _showToast('Please enter both English source text and your Spanish translation.');
+      _showToast(
+        'Please enter both English source text and your Spanish translation.',
+      );
       return;
     }
 
     if (_aiSettings.apiKey.isEmpty) {
       _openSettingsDialog();
-      _showToast('Please set your API key in Settings (or use Load Demo Exercise).');
+      _showToast(
+        'Please set your API key in Settings (or use Load Demo Exercise).',
+      );
       return;
     }
 
@@ -194,7 +203,10 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
       if (mounted) {
         if (officialEs.isEmpty && res.generatedOfficialSpanish != null) {
           _officialSpanishController.text = res.generatedOfficialSpanish!;
-          _diffChunks = WordDiff.diffWordsWithSpace(userEs, res.generatedOfficialSpanish!);
+          _diffChunks = WordDiff.diffWordsWithSpace(
+            userEs,
+            res.generatedOfficialSpanish!,
+          );
         }
 
         setState(() {
@@ -268,19 +280,14 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
   void _openSettingsDialog() {
     showDialog(
       context: context,
-      builder: (_) => SettingsDialog(
-        initialSettings: _aiSettings,
-        onSave: _saveAiSettings,
-      ),
+      builder: (_) =>
+          SettingsDialog(initialSettings: _aiSettings, onSave: _saveAiSettings),
     );
   }
 
   void _showToast(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        duration: const Duration(seconds: 3),
-      ),
+      SnackBar(content: Text(message), duration: const Duration(seconds: 3)),
     );
   }
 
@@ -290,7 +297,8 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
 
     return CallbackShortcuts(
       bindings: {
-        const SingleActivator(LogicalKeyboardKey.enter, meta: true): _runAIAnalysis,
+        const SingleActivator(LogicalKeyboardKey.enter, meta: true):
+            _runAIAnalysis,
       },
       child: Focus(
         autofocus: true,
@@ -327,8 +335,9 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                       if (_diffChunks.isNotEmpty) ...[
                         WordDiffWidget(
                           diffChunks: _diffChunks,
-                          hasOfficialText:
-                              _officialSpanishController.text.trim().isNotEmpty,
+                          hasOfficialText: _officialSpanishController.text
+                              .trim()
+                              .isNotEmpty,
                         ),
                         const SizedBox(height: 20),
                       ],
@@ -345,8 +354,11 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
   }
 
   PreferredSizeWidget _buildTopBar(GlobalKey<ScaffoldState> scaffoldKey) {
+    // Grow the bar with the platform text scale so the two-line wordmark does
+    // not overflow its fixed-height column at large accessibility sizes.
+    final double topBarHeight = MediaQuery.textScalerOf(context).scale(65);
     return PreferredSize(
-      preferredSize: const Size.fromHeight(65),
+      preferredSize: Size.fromHeight(topBarHeight),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: const BoxDecoration(
@@ -365,7 +377,10 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Center(
-                  child: Text('⇄', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  child: Text(
+                    '⇄',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -394,21 +409,33 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                   foregroundColor: const Color(0xFFE2E8F0),
                   side: const BorderSide(color: Color(0xFF334155)),
                   backgroundColor: const Color(0xFF1E293B),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                 ),
-                child: const Text('✨ Load Demo Exercise', style: TextStyle(fontSize: 12)),
+                child: const Text(
+                  '✨ Load Demo Exercise',
+                  style: TextStyle(fontSize: 12),
+                ),
               ),
               const SizedBox(width: 8),
               OutlinedButton(
-                onPressed: () => setState(() => _isThreeColumn = !_isThreeColumn),
+                onPressed: () =>
+                    setState(() => _isThreeColumn = !_isThreeColumn),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: const Color(0xFFE2E8F0),
                   side: const BorderSide(color: Color(0xFF334155)),
                   backgroundColor: const Color(0xFF1E293B),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                 ),
                 child: Text(
-                  _isThreeColumn ? '📐 3-Column View: On' : '📐 3-Column View: Off',
+                  _isThreeColumn
+                      ? '📐 3-Column View: On'
+                      : '📐 3-Column View: Off',
                   style: const TextStyle(fontSize: 12),
                 ),
               ),
@@ -419,16 +446,27 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                   foregroundColor: const Color(0xFFFCD34D),
                   side: const BorderSide(color: Color(0x66F59E0B)),
                   backgroundColor: const Color(0x22F59E0B),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('📓 Lessons Learned',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                    const Text(
+                      '📓 Lessons Learned',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(width: 6),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 1,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF59E0B),
                         borderRadius: BorderRadius.circular(10),
@@ -452,7 +490,10 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                   foregroundColor: const Color(0xFFE2E8F0),
                   side: const BorderSide(color: Color(0xFF334155)),
                   backgroundColor: const Color(0xFF1E293B),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                 ),
                 icon: const Icon(Icons.settings, size: 14),
                 label: Text(
@@ -480,7 +521,10 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0x3338BDF8),
                     borderRadius: BorderRadius.circular(12),
@@ -514,16 +558,21 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
               englishText: _englishController.text,
               critiques: _aiResult!.critiques,
               activeIndex: _hoveredPointerIndex,
-              onPointerHover: (idx) => setState(() => _hoveredPointerIndex = idx),
+              onPointerHover: (idx) =>
+                  setState(() => _hoveredPointerIndex = idx),
               onPointerSelected: _scrollToCard,
             )
           : TextField(
               controller: _englishController,
               maxLines: null,
-              style: const TextStyle(color: Color(0xFFF1F5F9), fontSize: 14, height: 1.6),
+              style: const TextStyle(
+                color: Color(0xFFF1F5F9),
+                fontSize: 14,
+                height: 1.6,
+              ),
               decoration: const InputDecoration(
                 hintText: 'Paste the original English paragraph here...',
-                hintStyle: TextStyle(color: Color(0xFF64748B)),
+                hintStyle: TextStyle(color: Color(0xFF94A3B8)),
                 border: InputBorder.none,
               ),
             ),
@@ -534,15 +583,19 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
       titleColor: const Color(0xFF34D399),
       trailing: const Text(
         'Type manually',
-        style: TextStyle(color: Color(0xFF64748B), fontSize: 11),
+        style: TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
       ),
       child: TextField(
         controller: _userSpanishController,
         maxLines: null,
-        style: const TextStyle(color: Color(0xFFF1F5F9), fontSize: 14, height: 1.6),
+        style: const TextStyle(
+          color: Color(0xFFF1F5F9),
+          fontSize: 14,
+          height: 1.6,
+        ),
         decoration: const InputDecoration(
           hintText: 'Escribe tu traducción al español aquí...',
-          hintStyle: TextStyle(color: Color(0xFF64748B)),
+          hintStyle: TextStyle(color: Color(0xFF94A3B8)),
           border: InputBorder.none,
         ),
       ),
@@ -554,7 +607,9 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
       trailing: InkWell(
         onTap: () => setState(() => _isOfficialBlurred = !_isOfficialBlurred),
         child: Text(
-          _isOfficialBlurred ? '🙈 Blur while typing: On' : '👁️ Blur while typing: Off',
+          _isOfficialBlurred
+              ? '🙈 Blur while typing: On'
+              : '👁️ Blur while typing: Off',
           style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
         ),
       ),
@@ -572,9 +627,8 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                   : null,
             ),
             decoration: const InputDecoration(
-              hintText:
-                  'Paste official Spanish translation here (or leave blank to let the AI generate one)...',
-              hintStyle: TextStyle(color: Color(0xFF64748B)),
+              hintText: 'Paste official Spanish translation here (or leave blank to let the AI generate one)...',
+              hintStyle: TextStyle(color: Color(0xFF94A3B8)),
               border: InputBorder.none,
             ),
           ),
@@ -582,32 +636,52 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
       ),
     );
 
-    if (_isThreeColumn) {
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(child: panel1),
-          const SizedBox(width: 12),
-          Expanded(child: panel2),
-          const SizedBox(width: 12),
-          Expanded(child: panel3),
-        ],
-      );
-    }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Phones and narrow portrait windows: one full-width pane per row.
+        // Forcing two panes side by side below 700px leaves each translation
+        // input too narrow to read, so every pane stacks vertically.
+        if (constraints.maxWidth < _stackedPaneBreakpoint) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              panel1,
+              const SizedBox(height: 12),
+              panel2,
+              const SizedBox(height: 12),
+              panel3,
+            ],
+          );
+        }
 
-    return Column(
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        if (_isThreeColumn) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: panel1),
+              const SizedBox(width: 12),
+              Expanded(child: panel2),
+              const SizedBox(width: 12),
+              Expanded(child: panel3),
+            ],
+          );
+        }
+
+        return Column(
           children: [
-            Expanded(child: panel1),
-            const SizedBox(width: 12),
-            Expanded(child: panel2),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: panel1),
+                const SizedBox(width: 12),
+                Expanded(child: panel2),
+              ],
+            ),
+            const SizedBox(height: 12),
+            panel3,
           ],
-        ),
-        const SizedBox(height: 12),
-        panel3,
-      ],
+        );
+      },
     );
   }
 
@@ -653,10 +727,7 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: child,
-          ),
+          Padding(padding: const EdgeInsets.all(16), child: child),
         ],
       ),
     );
@@ -685,8 +756,14 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                 onPressed: _isLoading ? null : _runAIAnalysis,
                 style: FilledButton.styleFrom(
                   backgroundColor: const Color(0xFF4F46E5),
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
                 icon: const Icon(Icons.school_outlined, size: 16),
                 label: const Text(
@@ -700,8 +777,13 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                   foregroundColor: const Color(0xFFE2E8F0),
                   side: const BorderSide(color: Color(0xFF334155)),
                   backgroundColor: const Color(0xFF1E293B),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
                 icon: const Icon(Icons.search, size: 16),
                 label: const Text(
@@ -711,7 +793,9 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
               ),
               TextButton(
                 onPressed: _clearWorkspace,
-                style: TextButton.styleFrom(foregroundColor: const Color(0xFF94A3B8)),
+                style: TextButton.styleFrom(
+                  foregroundColor: const Color(0xFF94A3B8),
+                ),
                 child: const Text('Clear All', style: TextStyle(fontSize: 12)),
               ),
             ],
@@ -733,6 +817,7 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
 
   Widget _buildLegendDot(Color color, String label) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           width: 8,
@@ -740,7 +825,12 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 6),
-        Text(label, style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11)),
+        Flexible(
+          child: Text(
+            label,
+            style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+          ),
+        ),
       ],
     );
   }
@@ -760,12 +850,16 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
           SizedBox(height: 14),
           Text(
             'Analyzing your translation against the English source and official reference...',
-            style: TextStyle(color: Color(0xFFE2E8F0), fontSize: 13, fontWeight: FontWeight.w500),
+            style: TextStyle(
+              color: Color(0xFFE2E8F0),
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
           ),
           SizedBox(height: 4),
           Text(
             'Mapping unnatural phrasings and grammar pointers back to English',
-            style: TextStyle(color: Color(0xFF64748B), fontSize: 11),
+            style: TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
           ),
         ],
       ),
@@ -790,10 +884,17 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
               children: [
                 const Text(
                   '🎯 AI Teaching Breakdown',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0x334F46E5),
                     borderRadius: BorderRadius.circular(16),
@@ -826,15 +927,20 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
         ),
         if (ai.summary.isNotEmpty) ...[
           const SizedBox(height: 6),
-          Text(ai.summary, style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13)),
+          Text(
+            ai.summary,
+            style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+          ),
         ],
         const SizedBox(height: 16),
         ...ai.critiques.asMap().entries.map((entry) {
           final idx = entry.key;
           final item = entry.value;
-          final isSaved = _savedLessons.any((l) =>
-              l.english == item.englishSegment &&
-              l.naturalSpanish == item.officialSpanish);
+          final isSaved = _savedLessons.any(
+            (l) =>
+                l.english == item.englishSegment &&
+                l.naturalSpanish == item.officialSpanish,
+          );
 
           return Padding(
             key: _cardKeys[idx],

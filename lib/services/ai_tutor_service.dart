@@ -1,5 +1,7 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
+
 import '../models/ai_settings.dart';
 import '../models/critique_model.dart';
 
@@ -44,10 +46,13 @@ IMPORTANT: "english_segment" MUST be an exact case-matching substring of ORIGINA
   }) async {
     final apiKey = settings.apiKey.trim();
     if (apiKey.isEmpty) {
-      throw StateError('Please enter your API Key in Settings to run AI analysis.');
+      throw StateError(
+        'Please enter your API Key in Settings to run AI analysis.',
+      );
     }
 
-    final userPrompt = '''
+    final userPrompt =
+        '''
 ORIGINAL ENGLISH:
 $englishText
 
@@ -91,20 +96,20 @@ ${officialSpanish.trim().isEmpty ? '(Not provided - please generate one)' : offi
     final payload = {
       'systemInstruction': {
         'parts': [
-          {'text': systemPrompt}
-        ]
+          {'text': systemPrompt},
+        ],
       },
       'contents': [
         {
           'parts': [
-            {'text': userPrompt}
-          ]
-        }
+            {'text': userPrompt},
+          ],
+        },
       ],
       'generationConfig': {
         'responseMimeType': 'application/json',
         'temperature': 0.2,
-      }
+      },
     };
 
     final response = await _client.post(
@@ -126,7 +131,9 @@ ${officialSpanish.trim().isEmpty ? '(Not provided - please generate one)' : offi
     }
 
     final parts = candidates[0]['content']?['parts'] as List<dynamic>?;
-    final text = parts != null && parts.isNotEmpty ? parts[0]['text'] as String : null;
+    final text = parts != null && parts.isNotEmpty
+        ? parts[0]['text'] as String
+        : null;
     if (text == null || text.trim().isEmpty) {
       throw Exception('Gemini candidate part returned empty text.');
     }
@@ -142,13 +149,15 @@ ${officialSpanish.trim().isEmpty ? '(Not provided - please generate one)' : offi
     final url = Uri.parse(endpoint);
     final model = settings.model.trim().isNotEmpty
         ? settings.model.trim()
-        : (settings.provider == AIProvider.deepseek ? 'deepseek-chat' : 'gpt-4o-mini');
+        : (settings.provider == AIProvider.deepseek
+              ? 'deepseek-chat'
+              : 'gpt-4o-mini');
 
     final payload = {
       'model': model,
       'messages': [
         {'role': 'system', 'content': systemPrompt},
-        {'role': 'user', 'content': userPrompt}
+        {'role': 'user', 'content': userPrompt},
       ],
       'response_format': {'type': 'json_object'},
       'temperature': 0.2,
@@ -212,10 +221,8 @@ ${officialSpanish.trim().isEmpty ? '(Not provided - please generate one)' : offi
   static AITutorResponse getDemoResponse() {
     return AITutorResponse(
       overallScore: '76 / 100 — Good structure, a few English calques',
-      summary:
-          "Your tense progression is solid, but watch out for false friends ('realizar' vs 'darse cuenta') and literal English prepositions ('buscar por').",
-      generatedOfficialSpanish:
-          'Llevo tres meses buscando un departamento nuevo, pero todavía no he encontrado nada que se ajuste a mi presupuesto. El viernes pasado me di cuenta de que, si me mudara un poco más lejos del centro, podría ahorrar mucho dinero en el alquiler.',
+      summary: "Your tense progression is solid, but watch out for false friends ('realizar' vs 'darse cuenta') and literal English prepositions ('buscar por').",
+      generatedOfficialSpanish: 'Llevo tres meses buscando un departamento nuevo, pero todavía no he encontrado nada que se ajuste a mi presupuesto. El viernes pasado me di cuenta de que, si me mudara un poco más lejos del centro, podría ahorrar mucho dinero en el alquiler.',
       critiques: [
         const CritiqueItem(
           englishSegment:
@@ -225,10 +232,8 @@ ${officialSpanish.trim().isEmpty ? '(Not provided - please generate one)' : offi
           officialSpanish: 'Llevo tres meses buscando un departamento nuevo',
           category: CritiqueCategory.error,
           grammarTopic: "Prepositions & 'Llevar + Gerundio'",
-          explanation:
-              "1) 'Buscar' already means 'to look for'—adding 'por' ('buscar por') is an English calque. Never put 'por' after buscar. 2) For ongoing actions over a duration, native speakers strongly prefer 'Llevo [time] + gerundio' over 'He estado + gerundio'.",
-          lessonTakeaway:
-              "Use 'buscar [algo]' (never 'buscar por'), and use 'llevar + [tiempo] + gerundio' to express 'have been doing for [time]'.",
+          explanation: "1) 'Buscar' already means 'to look for'—adding 'por' ('buscar por') is an English calque. Never put 'por' after buscar. 2) For ongoing actions over a duration, native speakers strongly prefer 'Llevo [time] + gerundio' over 'He estado + gerundio'.",
+          lessonTakeaway: "Use 'buscar [algo]' (never 'buscar por'), and use 'llevar + [tiempo] + gerundio' to express 'have been doing for [time]'.",
         ),
         const CritiqueItem(
           englishSegment: 'fits my budget',
@@ -236,10 +241,8 @@ ${officialSpanish.trim().isEmpty ? '(Not provided - please generate one)' : offi
           officialSpanish: 'se ajuste a mi presupuesto',
           category: CritiqueCategory.unnatural,
           grammarTopic: 'Vocab Nuance (Caber vs. Ajustarse) + Subjunctive',
-          explanation:
-              "'Caber' is for physical volume (fitting inside a box or car) and requires 'en'. For abstract limits like a budget or schedule, use 'ajustarse a' or 'adaptarse a'. Also, because the antecedent is negative ('no he encontrado nada que...'), the verb must be in the subjunctive ('se ajuste' / 'quepa').",
-          lessonTakeaway:
-              "After negative antecedents ('nada que...'), always use the subjunctive. For budgets/plans, use 'ajustarse a' instead of 'caber'.",
+          explanation: "'Caber' is for physical volume (fitting inside a box or car) and requires 'en'. For abstract limits like a budget or schedule, use 'ajustarse a' or 'adaptarse a'. Also, because the antecedent is negative ('no he encontrado nada que...'), the verb must be in the subjunctive ('se ajuste' / 'quepa').",
+          lessonTakeaway: "After negative antecedents ('nada que...'), always use the subjunctive. For budgets/plans, use 'ajustarse a' instead of 'caber'.",
         ),
         const CritiqueItem(
           englishSegment: 'I realized that',
@@ -247,10 +250,8 @@ ${officialSpanish.trim().isEmpty ? '(Not provided - please generate one)' : offi
           officialSpanish: 'me di cuenta de que',
           category: CritiqueCategory.error,
           grammarTopic: 'False Friend (Realizar vs. Darse cuenta de)',
-          explanation:
-              "Classic false friend! 'Realizar' means to carry out, accomplish, or fulfill a project. To mean 'realize' in the mental sense (coming to understand something), always use 'darse cuenta de que'.",
-          lessonTakeaway:
-              "'Realize' (mental awareness) = 'darse cuenta de que'. 'Realizar' = to carry out/accomplish.",
+          explanation: "Classic false friend! 'Realizar' means to carry out, accomplish, or fulfill a project. To mean 'realize' in the mental sense (coming to understand something), always use 'darse cuenta de que'.",
+          lessonTakeaway: "'Realize' (mental awareness) = 'darse cuenta de que'. 'Realizar' = to carry out/accomplish.",
         ),
         const CritiqueItem(
           englishSegment: 'on rent',
@@ -258,10 +259,8 @@ ${officialSpanish.trim().isEmpty ? '(Not provided - please generate one)' : offi
           officialSpanish: 'en el alquiler',
           category: CritiqueCategory.validAlternative,
           grammarTopic: 'Regional Vocabulary (Renta vs. Alquiler)',
-          explanation:
-              "The official translation uses 'el alquiler', which is standard across Spain and much of South America, but 'la renta' is completely natural and standard in Mexico and the US. Your choice here is 100% valid!",
-          lessonTakeaway:
-              "Both 'la renta' (Mexico/LatAm) and 'el alquiler' (Spain/South America) are natural translations for housing rent.",
+          explanation: "The official translation uses 'el alquiler', which is standard across Spain and much of South America, but 'la renta' is completely natural and standard in Mexico and the US. Your choice here is 100% valid!",
+          lessonTakeaway: "Both 'la renta' (Mexico/LatAm) and 'el alquiler' (Spain/South America) are natural translations for housing rent.",
         ),
       ],
     );

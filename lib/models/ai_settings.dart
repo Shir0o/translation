@@ -49,11 +49,7 @@ class AISettings {
     this.model = 'gemini-2.5-flash',
   });
 
-  AISettings copyWith({
-    AIProvider? provider,
-    String? apiKey,
-    String? model,
-  }) {
+  AISettings copyWith({AIProvider? provider, String? apiKey, String? model}) {
     return AISettings(
       provider: provider ?? this.provider,
       apiKey: apiKey ?? this.apiKey,
