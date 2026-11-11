@@ -21,7 +21,8 @@ class LessonItem {
     return LessonItem(
       id: json['id'] is int
           ? json['id'] as int
-          : int.tryParse(json['id'].toString()) ?? DateTime.now().millisecondsSinceEpoch,
+          : int.tryParse(json['id'].toString()) ??
+                DateTime.now().millisecondsSinceEpoch,
       date: json['date'] as String? ?? '',
       topic: json['topic'] as String? ?? 'General',
       english: json['english'] as String? ?? '',
@@ -32,14 +33,14 @@ class LessonItem {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'date': date,
-        'topic': topic,
-        'english': english,
-        'userSpanish': userSpanish,
-        'naturalSpanish': naturalSpanish,
-        'rule': rule,
-      };
+    'id': id,
+    'date': date,
+    'topic': topic,
+    'english': english,
+    'userSpanish': userSpanish,
+    'naturalSpanish': naturalSpanish,
+    'rule': rule,
+  };
 
   @override
   bool operator ==(Object other) =>

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../models/ai_settings.dart';
 
 class SettingsDialog extends StatefulWidget {
@@ -24,8 +25,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
   void initState() {
     super.initState();
     _provider = widget.initialSettings.provider;
-    _apiKeyController = TextEditingController(text: widget.initialSettings.apiKey);
-    _modelController = TextEditingController(text: widget.initialSettings.model);
+    _apiKeyController = TextEditingController(
+      text: widget.initialSettings.apiKey,
+    );
+    _modelController = TextEditingController(
+      text: widget.initialSettings.model,
+    );
   }
 
   @override
@@ -72,7 +77,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   ),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close, size: 18, color: Color(0xFF94A3B8)),
+                    icon: const Icon(
+                      Icons.close,
+                      size: 18,
+                      color: Color(0xFF94A3B8),
+                    ),
                   ),
                 ],
               ),
@@ -100,7 +109,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     value: _provider,
                     dropdownColor: const Color(0xFF0F172A),
                     isExpanded: true,
-                    style: const TextStyle(color: Color(0xFFF1F5F9), fontSize: 13),
+                    style: const TextStyle(
+                      color: Color(0xFFF1F5F9),
+                      fontSize: 13,
+                    ),
                     items: AIProvider.values.map((p) {
                       return DropdownMenuItem(
                         value: p,
@@ -132,7 +144,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   hintStyle: const TextStyle(color: Color(0xFF64748B)),
                   filled: true,
                   fillColor: const Color(0xFF020617),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: const BorderSide(color: Color(0xFF334155)),
@@ -143,7 +158,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Color(0xFF6366F1), width: 1.5),
+                    borderSide: const BorderSide(
+                      color: Color(0xFF6366F1),
+                      width: 1.5,
+                    ),
                   ),
                 ),
               ),
@@ -170,7 +188,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: const Color(0xFF020617),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: const BorderSide(color: Color(0xFF334155)),
@@ -181,7 +202,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Color(0xFF6366F1), width: 1.5),
+                    borderSide: const BorderSide(
+                      color: Color(0xFF6366F1),
+                      width: 1.5,
+                    ),
                   ),
                 ),
               ),
@@ -214,7 +238,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
                     ),
                     child: const Text('Save Settings'),
                   ),

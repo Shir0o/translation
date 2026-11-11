@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../core/diff/word_diff.dart';
 
 class WordDiffWidget extends StatelessWidget {
@@ -64,7 +65,10 @@ class WordDiffWidget extends StatelessWidget {
                 runSpacing: 4,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0x33F43F5E),
                       borderRadius: BorderRadius.circular(4),
@@ -79,7 +83,10 @@ class WordDiffWidget extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0x3310B981),
                       borderRadius: BorderRadius.circular(4),

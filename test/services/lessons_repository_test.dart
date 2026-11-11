@@ -48,13 +48,21 @@ void main() {
       expect(md, contains('## Prepositions (2026-10-14)'));
       expect(md, contains('- **English Trigger:** "looking for an apartment"'));
       expect(md, contains('- **My Draft:** ~~buscando por un apartamento~~'));
-      expect(md, contains('- **Natural Spanish:** **buscando un departamento**'));
+      expect(
+        md,
+        contains('- **Natural Spanish:** **buscando un departamento**'),
+      );
       expect(md, contains('- **Takeaway:** Never put "por" after buscar.'));
     });
 
     test('generates valid Anki CSV with correct columns', () {
       final csv = LessonsRepository.exportToAnkiCSV(testLessons);
-      expect(csv, contains('English Source,Natural Spanish,Avoid / My Mistake,Grammar Rule,Topic'));
+      expect(
+        csv,
+        contains(
+          'English Source,Natural Spanish,Avoid / My Mistake,Grammar Rule,Topic',
+        ),
+      );
       expect(csv, contains('looking for an apartment'));
       expect(csv, contains('buscando un departamento'));
       expect(csv, contains('Never put ""por"" after buscar.'));

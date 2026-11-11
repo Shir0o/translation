@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../models/critique_model.dart';
 
 class CritiqueCardWidget extends StatelessWidget {
@@ -32,7 +33,9 @@ class CritiqueCardWidget extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isHighlighted ? const Color(0xFF1E293B) : const Color(0xFF0F172A),
+          color: isHighlighted
+              ? const Color(0xFF1E293B)
+              : const Color(0xFF0F172A),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isHighlighted ? const Color(0xFF38BDF8) : borderCol,
@@ -44,14 +47,14 @@ class CritiqueCardWidget extends StatelessWidget {
                     color: const Color(0xFF38BDF8).withValues(alpha: 0.25),
                     blurRadius: 10,
                     spreadRadius: 1,
-                  )
+                  ),
                 ]
               : [
                   const BoxShadow(
                     color: Colors.black26,
                     blurRadius: 4,
                     offset: Offset(0, 2),
-                  )
+                  ),
                 ],
         ),
         child: Column(
@@ -64,7 +67,10 @@ class CritiqueCardWidget extends StatelessWidget {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: badgeBg,
                     borderRadius: BorderRadius.circular(6),
@@ -80,7 +86,10 @@ class CritiqueCardWidget extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFF1E293B),
                     borderRadius: BorderRadius.circular(20),
@@ -98,7 +107,9 @@ class CritiqueCardWidget extends StatelessWidget {
                 OutlinedButton.icon(
                   onPressed: onSaveLesson,
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: isSaved ? const Color(0xFF6EE7B7) : const Color(0xFFFCD34D),
+                    foregroundColor: isSaved
+                        ? const Color(0xFF6EE7B7)
+                        : const Color(0xFFFCD34D),
                     side: BorderSide(
                       color: isSaved
                           ? const Color(0x6610B981)
@@ -107,16 +118,24 @@ class CritiqueCardWidget extends StatelessWidget {
                     backgroundColor: isSaved
                         ? const Color(0x2210B981)
                         : const Color(0x22F59E0B),
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     visualDensity: VisualDensity.compact,
                   ),
                   icon: Icon(
-                    isSaved ? Icons.check_circle_outline : Icons.bookmark_add_outlined,
+                    isSaved
+                        ? Icons.check_circle_outline
+                        : Icons.bookmark_add_outlined,
                     size: 14,
                   ),
                   label: Text(
                     isSaved ? 'Saved to Lessons' : 'Save Lesson',
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
@@ -124,52 +143,86 @@ class CritiqueCardWidget extends StatelessWidget {
             const SizedBox(height: 12),
 
             // 3-Way Comparison Grid
-            LayoutBuilder(builder: (context, constraints) {
-              final isNarrow = constraints.maxWidth < 750;
-              final tiles = [
-                // 1. English Pointer Box
-                InkWell(
-                  onTap: onJumpToEnglish,
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF020617),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: const Color(0x4D38BDF8)),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Flexible(
-                              child: Text(
-                                '🇬🇧 English Source Pointer',
-                                overflow: TextOverflow.ellipsis,
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isNarrow = constraints.maxWidth < 750;
+                final tiles = [
+                  // 1. English Pointer Box
+                  InkWell(
+                    onTap: onJumpToEnglish,
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF020617),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0x4D38BDF8)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  '🇬🇧 English Source Pointer',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: Color(0xFF38BDF8),
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                '↗ Jump',
                                 style: TextStyle(
                                   color: Color(0xFF38BDF8),
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '"${item.englishSegment}"',
+                            style: const TextStyle(
+                              color: Color(0xFFF8FAFC),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
                             ),
-                            Text(
-                              '↗ Jump',
-                              style: TextStyle(
-                                color: Color(0xFF38BDF8),
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // 2. User Spanish Box
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF020617),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFF1E293B)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          '✍️ Your Spanish',
+                          style: TextStyle(
+                            color: Color(0xFFFB7185),
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '"${item.englishSegment}"',
+                          item.userSpanish,
                           style: const TextStyle(
-                            color: Color(0xFFF8FAFC),
+                            color: Color(0xFFFECDD3),
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
                           ),
@@ -177,95 +230,65 @@ class CritiqueCardWidget extends StatelessWidget {
                       ],
                     ),
                   ),
-                ),
 
-                // 2. User Spanish Box
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF020617),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFF1E293B)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        '✍️ Your Spanish',
-                        style: TextStyle(
-                          color: Color(0xFFFB7185),
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
+                  // 3. Official / Ideal Spanish Box
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF020617),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFF1E293B)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          '📖 Official / Natural Spanish',
+                          style: TextStyle(
+                            color: Color(0xFF34D399),
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        item.userSpanish,
-                        style: const TextStyle(
-                          color: Color(0xFFFECDD3),
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
+                        const SizedBox(height: 4),
+                        Text(
+                          item.officialSpanish,
+                          style: const TextStyle(
+                            color: Color(0xFFA7F3D0),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
+                ];
 
-                // 3. Official / Ideal Spanish Box
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF020617),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFF1E293B)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        '📖 Official / Natural Spanish',
-                        style: TextStyle(
-                          color: Color(0xFF34D399),
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        item.officialSpanish,
-                        style: const TextStyle(
-                          color: Color(0xFFA7F3D0),
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ];
-
-              if (isNarrow) {
-                return Column(
-                  children: tiles
-                      .map((w) => Padding(
+                if (isNarrow) {
+                  return Column(
+                    children: tiles
+                        .map(
+                          (w) => Padding(
                             padding: const EdgeInsets.only(bottom: 8),
                             child: w,
-                          ))
-                      .toList(),
-                );
-              }
+                          ),
+                        )
+                        .toList(),
+                  );
+                }
 
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(child: tiles[0]),
-                  const SizedBox(width: 8),
-                  Expanded(child: tiles[1]),
-                  const SizedBox(width: 8),
-                  Expanded(child: tiles[2]),
-                ],
-              );
-            }),
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: tiles[0]),
+                    const SizedBox(width: 8),
+                    Expanded(child: tiles[1]),
+                    const SizedBox(width: 8),
+                    Expanded(child: tiles[2]),
+                  ],
+                );
+              },
+            ),
             const SizedBox(height: 12),
 
             // Why Explanation
@@ -328,7 +351,9 @@ class CritiqueCardWidget extends StatelessWidget {
     );
   }
 
-  (Color bg, Color border, Color text) _getCategoryStyles(CritiqueCategory category) {
+  (Color bg, Color border, Color text) _getCategoryStyles(
+    CritiqueCategory category,
+  ) {
     switch (category) {
       case CritiqueCategory.error:
         return (

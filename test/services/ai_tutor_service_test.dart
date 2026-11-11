@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -13,7 +14,10 @@ void main() {
       expect(demo.critiques.length, equals(4));
       expect(demo.critiques[0].category, equals(CritiqueCategory.error));
       expect(demo.critiques[1].category, equals(CritiqueCategory.unnatural));
-      expect(demo.critiques[3].category, equals(CritiqueCategory.validAlternative));
+      expect(
+        demo.critiques[3].category,
+        equals(CritiqueCategory.validAlternative),
+      );
       expect(demo.generatedOfficialSpanish, isNotNull);
     });
 
@@ -26,7 +30,8 @@ void main() {
                 {
                   'text': jsonEncode({
                     'overall_score': '90 / 100 — Excellent',
-                    'summary': 'Very natural phrasing with minor stylistic note.',
+                    'summary':
+                        'Very natural phrasing with minor stylistic note.',
                     'critiques': [
                       {
                         'english_segment': 'for three months',
@@ -35,20 +40,24 @@ void main() {
                         'category': 'unnatural',
                         'grammar_topic': 'Prepositions',
                         'explanation': 'Use durante instead of por.',
-                        'lesson_takeaway': 'Prefer durante for duration.'
-                      }
-                    ]
-                  })
-                }
-              ]
-            }
-          }
-        ]
+                        'lesson_takeaway': 'Prefer durante for duration.',
+                      },
+                    ],
+                  }),
+                },
+              ],
+            },
+          },
+        ],
       });
 
       final mockClient = MockClient((request) async {
         expect(request.url.host, equals('generativelanguage.googleapis.com'));
-        return http.Response(mockJson, 200, headers: {'content-type': 'application/json'});
+        return http.Response(
+          mockJson,
+          200,
+          headers: {'content-type': 'application/json'},
+        );
       });
 
       final service = AITutorService(client: mockClient);

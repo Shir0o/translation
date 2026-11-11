@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:csv/csv.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../models/lesson_model.dart';
 
 class LessonsRepository {
@@ -60,7 +62,9 @@ class LessonsRepository {
 
   /// Generates clean Markdown documentation string
   static String exportToMarkdown(List<LessonItem> lessons) {
-    if (lessons.isEmpty) return '# Spanish Translation Lessons Learned\n\nNo lessons recorded yet.\n';
+    if (lessons.isEmpty) {
+      return '# Spanish Translation Lessons Learned\n\nNo lessons recorded yet.\n';
+    }
     final buffer = StringBuffer('# Spanish Translation Lessons Learned\n\n');
     for (final l in lessons) {
       buffer.writeln('## ${l.topic} (${l.date})');
@@ -75,7 +79,13 @@ class LessonsRepository {
   /// Generates CSV compatible with Anki flashcard import
   static String exportToAnkiCSV(List<LessonItem> lessons) {
     final rows = <List<dynamic>>[
-      ['English Source', 'Natural Spanish', 'Avoid / My Mistake', 'Grammar Rule', 'Topic']
+      [
+        'English Source',
+        'Natural Spanish',
+        'Avoid / My Mistake',
+        'Grammar Rule',
+        'Topic',
+      ],
     ];
     for (final l in lessons) {
       rows.add([l.english, l.naturalSpanish, l.userSpanish, l.rule, l.topic]);

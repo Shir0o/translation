@@ -61,14 +61,14 @@ class CritiqueItem {
   }
 
   Map<String, dynamic> toJson() => {
-        'english_segment': englishSegment,
-        'user_spanish': userSpanish,
-        'official_spanish': officialSpanish,
-        'category': category.name,
-        'grammar_topic': grammarTopic,
-        'explanation': explanation,
-        'lesson_takeaway': lessonTakeaway,
-      };
+    'english_segment': englishSegment,
+    'user_spanish': userSpanish,
+    'official_spanish': officialSpanish,
+    'category': category.name,
+    'grammar_topic': grammarTopic,
+    'explanation': explanation,
+    'lesson_takeaway': lessonTakeaway,
+  };
 }
 
 class AITutorResponse {
@@ -98,9 +98,9 @@ class AITutorResponse {
   }
 
   Map<String, dynamic> toJson() => {
-        'overall_score': overallScore,
-        'summary': summary,
-        'generated_official_spanish': generatedOfficialSpanish,
-        'critiques': critiques.map((c) => c.toJson()).toList(),
-      };
+    'overall_score': overallScore,
+    'summary': summary,
+    'generated_official_spanish': generatedOfficialSpanish,
+    'critiques': critiques.map((c) => c.toJson()).toList(),
+  };
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../models/lesson_model.dart';
 import '../../services/lessons_repository.dart';
 
@@ -81,9 +82,8 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
       extension: 'md',
     );
     if (mounted && path != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Exported to $path')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Exported to $path')));
     }
   }
 
@@ -101,9 +101,8 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
       extension: 'csv',
     );
     if (mounted && path != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Exported Anki deck to $path')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Exported Anki deck to $path')));
     }
   }
 
@@ -150,7 +149,10 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFFE2E8F0),
                       side: const BorderSide(color: Color(0xFF334155)),
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       visualDensity: VisualDensity.compact,
                     ),
                     child: const Text('⬇ .MD', style: TextStyle(fontSize: 11)),
@@ -161,7 +163,10 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFFE2E8F0),
                       side: const BorderSide(color: Color(0xFF334155)),
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       visualDensity: VisualDensity.compact,
                     ),
                     child: const Text('⬇ Anki', style: TextStyle(fontSize: 11)),
@@ -180,7 +185,8 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
               child: Column(
                 children: [
                   InkWell(
-                    onTap: () => setState(() => _isAddExpanded = !_isAddExpanded),
+                    onTap: () =>
+                        setState(() => _isAddExpanded = !_isAddExpanded),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -207,12 +213,17 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
                     Row(
                       children: [
                         Expanded(
-                          child: _buildMiniInput(_enController, 'English trigger phrase...'),
+                          child: _buildMiniInput(
+                            _enController,
+                            'English trigger phrase...',
+                          ),
                         ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: _buildMiniInput(
-                              _topicController, 'Category (e.g., Subjunctive)'),
+                            _topicController,
+                            'Category (e.g., Subjunctive)',
+                          ),
                         ),
                       ],
                     ),
@@ -257,7 +268,10 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
                         ),
                         child: const Text(
                           'Save to Notebook',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
                         ),
                       ),
                     ),
@@ -333,13 +347,19 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
                 children: [
                   Text(
                     item.date,
-                    style: const TextStyle(color: Color(0xFF64748B), fontSize: 11),
+                    style: const TextStyle(
+                      color: Color(0xFF64748B),
+                      fontSize: 11,
+                    ),
                   ),
                   const SizedBox(width: 8),
                   InkWell(
                     onTap: () => widget.onDeleteLesson(item.id),
-                    child: const Icon(Icons.delete_outline,
-                        size: 16, color: Color(0xFF94A3B8)),
+                    child: const Icon(
+                      Icons.delete_outline,
+                      size: 16,
+                      color: Color(0xFF94A3B8),
+                    ),
                   ),
                 ],
               ),
@@ -361,18 +381,28 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('🇬🇧 English:',
-                            style: TextStyle(color: Color(0xFF38BDF8), fontSize: 10)),
+                        const Text(
+                          '🇬🇧 English:',
+                          style: TextStyle(
+                            color: Color(0xFF38BDF8),
+                            fontSize: 10,
+                          ),
+                        ),
                         const SizedBox(height: 2),
-                        Text(item.english,
-                            style: const TextStyle(
-                                color: Color(0xFFE2E8F0), fontSize: 11)),
+                        Text(
+                          item.english,
+                          style: const TextStyle(
+                            color: Color(0xFFE2E8F0),
+                            fontSize: 11,
+                          ),
+                        ),
                       ],
                     ),
                   ),
                 ),
               if (item.english.isNotEmpty &&
-                  (item.userSpanish.isNotEmpty || item.naturalSpanish.isNotEmpty))
+                  (item.userSpanish.isNotEmpty ||
+                      item.naturalSpanish.isNotEmpty))
                 const SizedBox(width: 6),
               if (item.userSpanish.isNotEmpty)
                 Expanded(
@@ -386,8 +416,13 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('❌ Avoid:',
-                            style: TextStyle(color: Color(0xFFFB7185), fontSize: 10)),
+                        const Text(
+                          '❌ Avoid:',
+                          style: TextStyle(
+                            color: Color(0xFFFB7185),
+                            fontSize: 10,
+                          ),
+                        ),
                         const SizedBox(height: 2),
                         Text(
                           item.userSpanish,
@@ -414,12 +449,21 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('✅ Natural:',
-                            style: TextStyle(color: Color(0xFF34D399), fontSize: 10)),
+                        const Text(
+                          '✅ Natural:',
+                          style: TextStyle(
+                            color: Color(0xFF34D399),
+                            fontSize: 10,
+                          ),
+                        ),
                         const SizedBox(height: 2),
-                        Text(item.naturalSpanish,
-                            style: const TextStyle(
-                                color: Color(0xFFA7F3D0), fontSize: 11)),
+                        Text(
+                          item.naturalSpanish,
+                          style: const TextStyle(
+                            color: Color(0xFFA7F3D0),
+                            fontSize: 11,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -459,7 +503,10 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
     return TextField(
       controller: controller,
       maxLines: maxLines,
-      style: TextStyle(color: textColor ?? const Color(0xFFF1F5F9), fontSize: 12),
+      style: TextStyle(
+        color: textColor ?? const Color(0xFFF1F5F9),
+        fontSize: 12,
+      ),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(color: Color(0xFF64748B), fontSize: 11),
