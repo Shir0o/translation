@@ -34,11 +34,10 @@
 //
 // Contrast note (audit finding)
 // -----------------------------
-// Many secondary labels use intentionally muted colours (e.g. #64748B on
-// #0F172A) that fall below WCAG 4.5:1. The contrast guideline is evaluated on
-// every matrix and its findings are printed, but it is not enforced yet so the
-// suite can serve as a baseline. Flip `_enforceTextContrast` to `true` once the
-// palette is remediated.
+// Secondary labels previously used muted colours (e.g. #64748B on #0F172A)
+// that fall below WCAG 4.5:1. The palette has since been remediated, so the
+// contrast guideline is now enforced on every matrix via
+// `_enforceTextContrast`.
 
 import 'dart:io';
 
@@ -57,8 +56,9 @@ const Size _smallSize = Size(320, 568);
 /// every primary control (demo, 3-column toggle, lessons, settings).
 const Size _interactiveSize = Size(1200, 800);
 
-/// Enforce WCAG text contrast once the muted dark palette has been fixed.
-const bool _enforceTextContrast = false;
+/// Enforce WCAG text contrast. The muted dark palette has been remediated, so
+/// contrast regressions fail the audit instead of only being reported.
+const bool _enforceTextContrast = true;
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -171,6 +171,33 @@ void main() {
       _expectNoOverflow(tester, 'interactive: results after semantics');
 
       await _expectAuditGolden(tester, 'audit_interactive_demo.png');
+    });
+
+    testWidgets('interactive: open lessons learned notebook drawer', (
+      tester,
+    ) async {
+      _configureView(tester, _desktopSize);
+      _setPlatformBrightness(tester, Brightness.dark);
+
+      await _pumpApp(tester);
+      _expectNoOverflow(tester, 'interactive: workspace before drawer');
+
+      // The top bar scrolls horizontally; bring the trigger into view before
+      // tapping so the gesture lands on a hit-testable point.
+      final Finder lessonsButton = find.textContaining('Lessons Learned');
+      await tester.ensureVisible(lessonsButton);
+      await tester.pumpAndSettle();
+
+      await tester.tap(lessonsButton);
+      await tester.pumpAndSettle();
+      _expectNoOverflow(tester, 'interactive: drawer opened');
+
+      expect(find.text('📓 Lessons Learned Notebook'), findsOneWidget);
+
+      await _auditAccessibility(tester, 'interactive: drawer');
+      _expectNoOverflow(tester, 'interactive: drawer after semantics');
+
+      await _expectAuditGolden(tester, 'audit_interactive_drawer.png');
     });
   });
 }
