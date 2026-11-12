@@ -110,7 +110,9 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
   Widget build(BuildContext context) {
     return Drawer(
       backgroundColor: const Color(0xFF0F172A),
-      width: 500,
+      width: MediaQuery.sizeOf(context).width < 540
+          ? MediaQuery.sizeOf(context).width * 0.9
+          : 500,
       child: SafeArea(
         child: Column(
           children: [
@@ -122,28 +124,30 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
               ),
               child: Row(
                 children: [
-                  const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '📓 Lessons Learned Notebook',
-                        style: TextStyle(
-                          color: Color(0xFFFBBF24),
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '📓 Lessons Learned Notebook',
+                          style: TextStyle(
+                            color: Color(0xFFFBBF24),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 2),
-                      Text(
-                        'Saved patterns, idioms, and grammar takeaways',
-                        style: TextStyle(
-                          color: Color(0xFF94A3B8),
-                          fontSize: 11,
+                        SizedBox(height: 2),
+                        Text(
+                          'Saved patterns, idioms, and grammar takeaways',
+                          style: TextStyle(
+                            color: Color(0xFF94A3B8),
+                            fontSize: 11,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                  const Spacer(),
+                  const SizedBox(width: 8),
                   OutlinedButton(
                     onPressed: _exportMarkdown,
                     style: OutlinedButton.styleFrom(
@@ -290,7 +294,7 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
                           'No lessons saved yet.\nClick "Save Lesson" on any AI critique card to build your personal Spanish study notebook.',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: Color(0xFF64748B),
+                            color: Color(0xFF94A3B8),
                             fontSize: 13,
                             height: 1.5,
                           ),

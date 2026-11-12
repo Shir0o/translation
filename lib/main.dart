@@ -377,9 +377,12 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Center(
-                  child: Text(
-                    '⇄',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  child: ExcludeSemantics(
+                    child: Icon(
+                      Icons.compare_arrows_rounded,
+                      color: Colors.white,
+                      size: 22,
+                    ),
                   ),
                 ),
               ),
@@ -397,7 +400,7 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                     ),
                   ),
                   Text(
-                    'EN → ES Side-by-Side Translation & AI Tutor (macOS)',
+                    'EN → ES Side-by-Side Translation & AI Tutor',
                     style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
                   ),
                 ],
@@ -419,26 +422,29 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                   style: TextStyle(fontSize: 12),
                 ),
               ),
-              const SizedBox(width: 8),
-              OutlinedButton(
-                onPressed: () =>
-                    setState(() => _isThreeColumn = !_isThreeColumn),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFFE2E8F0),
-                  side: const BorderSide(color: Color(0xFF334155)),
-                  backgroundColor: const Color(0xFF1E293B),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
+              if (MediaQuery.sizeOf(context).width >=
+                  _stackedPaneBreakpoint) ...[
+                const SizedBox(width: 8),
+                OutlinedButton(
+                  onPressed: () =>
+                      setState(() => _isThreeColumn = !_isThreeColumn),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFFE2E8F0),
+                    side: const BorderSide(color: Color(0xFF334155)),
+                    backgroundColor: const Color(0xFF1E293B),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                  ),
+                  child: Text(
+                    _isThreeColumn
+                        ? '📐 3-Column View: On'
+                        : '📐 3-Column View: Off',
+                    style: const TextStyle(fontSize: 12),
                   ),
                 ),
-                child: Text(
-                  _isThreeColumn
-                      ? '📐 3-Column View: On'
-                      : '📐 3-Column View: Off',
-                  style: const TextStyle(fontSize: 12),
-                ),
-              ),
+              ],
               const SizedBox(width: 8),
               OutlinedButton(
                 onPressed: () => scaffoldKey.currentState?.openEndDrawer(),
