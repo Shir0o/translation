@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/Shir0o/translation/compare/v1.0.2...v1.0.3) (2026-11-19)
+
+
+### Bug Fixes
+
+* **ui:** wrap responsive header actions and fix accessibility audit gaps ([#6](https://github.com/Shir0o/translation/issues/6)) ([f7bc3a7](https://github.com/Shir0o/translation/commit/f7bc3a72c84892fcfa5f8fc8da4afba177318c3d))
+
 ## [1.0.2](https://github.com/Shir0o/translation/compare/v1.0.1...v1.0.2) (2026-11-12)
 
 
