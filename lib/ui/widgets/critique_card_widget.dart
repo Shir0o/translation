@@ -122,7 +122,6 @@ class CritiqueCardWidget extends StatelessWidget {
                       horizontal: 12,
                       vertical: 6,
                     ),
-                    visualDensity: VisualDensity.compact,
                   ),
                   icon: Icon(
                     isSaved
@@ -324,12 +323,14 @@ class CritiqueCardWidget extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    '💡 Takeaway: ',
-                    style: TextStyle(
-                      color: Color(0xFFFBBF24),
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                  const Flexible(
+                    child: Text(
+                      '💡 Takeaway: ',
+                      style: TextStyle(
+                        color: Color(0xFFFBBF24),
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   Expanded(
