@@ -74,6 +74,11 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
 
   final Map<int, GlobalKey> _cardKeys = {};
 
+  /// Stable Scaffold key: creating a new one on every build recreates the
+  /// Scaffold subtree and slams the open notebook drawer shut whenever a
+  /// lesson is saved.
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   void initState() {
     super.initState();
@@ -293,8 +298,6 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-
     return CallbackShortcuts(
       bindings: {
         const SingleActivator(LogicalKeyboardKey.enter, meta: true):
@@ -303,49 +306,65 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
       child: Focus(
         autofocus: true,
         child: Scaffold(
-          key: scaffoldKey,
+          key: _scaffoldKey,
           endDrawer: LessonsDrawer(
             lessons: _savedLessons,
             onAddManualLesson: _addManualLesson,
             onDeleteLesson: _deleteLesson,
           ),
-          appBar: _buildTopBar(scaffoldKey),
-          body: SingleChildScrollView(
-            controller: _scrollController,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1280),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Input Workspace Panes
-                    _buildWorkspacePanes(),
-                    const SizedBox(height: 16),
+          body: SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                // Pinned header: always visible, wraps instead of scrolling
+                // actions off the right edge.
+                _buildHeader(),
+                Expanded(
+                  child: SingleChildScrollView(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 20,
+                    ),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 1280),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // Input Workspace Panes
+                            _buildWorkspacePanes(),
+                            const SizedBox(height: 16),
 
-                    // Actions Bar
-                    _buildActionBar(),
-                    const SizedBox(height: 24),
+                            // Actions Bar
+                            _buildActionBar(),
+                            const SizedBox(height: 24),
 
-                    // Loading State
-                    if (_isLoading) _buildLoadingCard(),
+                            // Loading State
+                            if (_isLoading) _buildLoadingCard(),
 
-                    // Results: Word Diff + AI Critique Cards
-                    if (_diffChunks.isNotEmpty || _aiResult != null) ...[
-                      if (_diffChunks.isNotEmpty) ...[
-                        WordDiffWidget(
-                          diffChunks: _diffChunks,
-                          hasOfficialText: _officialSpanishController.text
-                              .trim()
-                              .isNotEmpty,
+                            // Results: Word Diff + AI Critique Cards
+                            if (_diffChunks.isNotEmpty ||
+                                _aiResult != null) ...[
+                              if (_diffChunks.isNotEmpty) ...[
+                                WordDiffWidget(
+                                  diffChunks: _diffChunks,
+                                  hasOfficialText: _officialSpanishController
+                                      .text
+                                      .trim()
+                                      .isNotEmpty,
+                                ),
+                                const SizedBox(height: 20),
+                              ],
+                              if (_aiResult != null) _buildAiResultsSection(),
+                            ],
+                          ],
                         ),
-                        const SizedBox(height: 20),
-                      ],
-                      if (_aiResult != null) _buildAiResultsSection(),
-                    ],
-                  ],
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
         ),
@@ -353,166 +372,181 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
     );
   }
 
-  PreferredSizeWidget _buildTopBar(GlobalKey<ScaffoldState> scaffoldKey) {
-    // Grow the bar with the platform text scale so the two-line wordmark does
-    // not overflow its fixed-height column at large accessibility sizes.
-    final double topBarHeight = MediaQuery.textScalerOf(context).scale(65);
-    return PreferredSize(
-      preferredSize: Size.fromHeight(topBarHeight),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: const BoxDecoration(
-          color: Color(0xFF0F172A),
-          border: Border(bottom: BorderSide(color: Color(0xFF1E293B))),
+  /// Pinned workspace header.
+  ///
+  /// This used to be a fixed-height [AppBar] wrapping a horizontal
+  /// [SingleChildScrollView], which pushed the right-hand actions (Lessons
+  /// Learned / Set API Key) past the viewport edge at 800-1440 px and hid all
+  /// four actions on phones with no scroll affordance. It now lives at the top
+  /// of the body and wraps its children, so every action stays on screen and
+  /// tappable from 320 px @ 1.6x up to 1440 px.
+  Widget _buildHeader() {
+    return Container(
+      key: const Key('workspace-header'),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: const BoxDecoration(
+        color: Color(0xFF0F172A),
+        border: Border(bottom: BorderSide(color: Color(0xFF1E293B))),
+      ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1280),
+          child: SizedBox(
+            width: double.infinity,
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 16,
+              runSpacing: 10,
+              children: [_buildHeaderBrand(), _buildHeaderActions()],
+            ),
+          ),
         ),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
+      ),
+    );
+  }
+
+  Widget _buildHeaderBrand() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: const Color(0xFF4F46E5),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Center(
+            child: ExcludeSemantics(
+              child: Icon(
+                Icons.compare_arrows_rounded,
+                color: Colors.white,
+                size: 22,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        // Flexible keeps the two-line wordmark inside the header even when the
+        // platform text scale makes it wider than the available run.
+        Flexible(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const [
+              Text(
+                'LingoDiff Studio',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              Text(
+                'EN → ES Side-by-Side Translation & AI Tutor',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHeaderActions() {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        OutlinedButton(
+          onPressed: _loadSampleExercise,
+          style: _headerButtonStyle(),
+          child: const Text(
+            '✨ Load Demo Exercise',
+            style: TextStyle(fontSize: 12),
+          ),
+        ),
+        if (MediaQuery.sizeOf(context).width >= _stackedPaneBreakpoint)
+          OutlinedButton(
+            onPressed: () => setState(() => _isThreeColumn = !_isThreeColumn),
+            style: _headerButtonStyle(),
+            child: Text(
+              _isThreeColumn ? '📐 3-Column View: On' : '📐 3-Column View: Off',
+              style: const TextStyle(fontSize: 12),
+            ),
+          ),
+        OutlinedButton(
+          onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
+          style: _headerButtonStyle(
+            foregroundColor: const Color(0xFFFCD34D),
+            borderColor: const Color(0x66F59E0B),
+            backgroundColor: const Color(0x22F59E0B),
+          ),
           child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
+              // Flexible so the label wraps instead of pushing the badge past
+              // the button edge at large text scales.
+              const Flexible(
+                child: Text(
+                  '📓 Lessons Learned',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+              ),
+              const SizedBox(width: 6),
               Container(
-                width: 36,
-                height: 36,
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4F46E5),
-                  borderRadius: BorderRadius.circular(8),
+                  color: const Color(0xFFF59E0B),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Center(
-                  child: ExcludeSemantics(
-                    child: Icon(
-                      Icons.compare_arrows_rounded,
-                      color: Colors.white,
-                      size: 22,
-                    ),
+                child: Text(
+                  '${_savedLessons.length}',
+                  style: const TextStyle(
+                    color: Color(0xFF0F172A),
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
                   ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'LingoDiff Studio',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  Text(
-                    'EN → ES Side-by-Side Translation & AI Tutor',
-                    style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
-                  ),
-                ],
-              ),
-              const SizedBox(width: 24),
-              OutlinedButton(
-                onPressed: _loadSampleExercise,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFFE2E8F0),
-                  side: const BorderSide(color: Color(0xFF334155)),
-                  backgroundColor: const Color(0xFF1E293B),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                ),
-                child: const Text(
-                  '✨ Load Demo Exercise',
-                  style: TextStyle(fontSize: 12),
-                ),
-              ),
-              if (MediaQuery.sizeOf(context).width >=
-                  _stackedPaneBreakpoint) ...[
-                const SizedBox(width: 8),
-                OutlinedButton(
-                  onPressed: () =>
-                      setState(() => _isThreeColumn = !_isThreeColumn),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFFE2E8F0),
-                    side: const BorderSide(color: Color(0xFF334155)),
-                    backgroundColor: const Color(0xFF1E293B),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                  ),
-                  child: Text(
-                    _isThreeColumn
-                        ? '📐 3-Column View: On'
-                        : '📐 3-Column View: Off',
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                ),
-              ],
-              const SizedBox(width: 8),
-              OutlinedButton(
-                onPressed: () => scaffoldKey.currentState?.openEndDrawer(),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFFFCD34D),
-                  side: const BorderSide(color: Color(0x66F59E0B)),
-                  backgroundColor: const Color(0x22F59E0B),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text(
-                      '📓 Lessons Learned',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 1,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF59E0B),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        '${_savedLessons.length}',
-                        style: const TextStyle(
-                          color: Color(0xFF0F172A),
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              OutlinedButton.icon(
-                onPressed: _openSettingsDialog,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFFE2E8F0),
-                  side: const BorderSide(color: Color(0xFF334155)),
-                  backgroundColor: const Color(0xFF1E293B),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                ),
-                icon: const Icon(Icons.settings, size: 14),
-                label: Text(
-                  _aiSettings.apiKey.isNotEmpty
-                      ? 'API Ready (${_aiSettings.provider.name})'
-                      : 'Set API Key',
-                  style: const TextStyle(fontSize: 12),
                 ),
               ),
             ],
           ),
         ),
-      ),
+        OutlinedButton.icon(
+          onPressed: _openSettingsDialog,
+          style: _headerButtonStyle(),
+          icon: const Icon(Icons.settings, size: 14),
+          label: Text(
+            _aiSettings.apiKey.isNotEmpty
+                ? 'API Ready (${_aiSettings.provider.name})'
+                : 'Set API Key',
+            style: const TextStyle(fontSize: 12),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Shared header action style: 48x48dp minimum tap target on every platform
+  /// and WCAG AA text contrast against the [Color(0xFF0F172A)] header.
+  ButtonStyle _headerButtonStyle({
+    Color foregroundColor = const Color(0xFFE2E8F0),
+    Color borderColor = const Color(0xFF334155),
+    Color backgroundColor = const Color(0xFF1E293B),
+  }) {
+    return OutlinedButton.styleFrom(
+      foregroundColor: foregroundColor,
+      side: BorderSide(color: borderColor),
+      backgroundColor: backgroundColor,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      minimumSize: const Size(48, 48),
+      tapTargetSize: MaterialTapTargetSize.padded,
     );
   }
 
@@ -547,12 +581,17 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                 ),
                 InkWell(
                   onTap: () => setState(() => _isEnglishInteractive = false),
-                  child: const Text(
-                    'Edit Source',
-                    style: TextStyle(
-                      color: Color(0xFF94A3B8),
-                      fontSize: 11,
-                      decoration: TextDecoration.underline,
+                  borderRadius: BorderRadius.circular(6),
+                  child: const Padding(
+                    // 48dp minimum tap target on touch devices.
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Text(
+                      'Edit Source',
+                      style: TextStyle(
+                        color: Color(0xFF94A3B8),
+                        fontSize: 11,
+                        decoration: TextDecoration.underline,
+                      ),
                     ),
                   ),
                 ),
@@ -612,11 +651,16 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
       titleColor: const Color(0xFFA78BFA),
       trailing: InkWell(
         onTap: () => setState(() => _isOfficialBlurred = !_isOfficialBlurred),
-        child: Text(
-          _isOfficialBlurred
-              ? '🙈 Blur while typing: On'
-              : '👁️ Blur while typing: Off',
-          style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+        borderRadius: BorderRadius.circular(6),
+        child: Padding(
+          // 48dp minimum tap target on touch devices.
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Text(
+            _isOfficialBlurred
+                ? '🙈 Blur while typing: On'
+                : '👁️ Blur while typing: Off',
+            style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+          ),
         ),
       ),
       child: Stack(

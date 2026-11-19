@@ -26,7 +26,7 @@ class WordDiffWidget extends StatelessWidget {
         child: const Text(
           'No official reference text provided. Paste an official translation in Panel 3 or run AI Tutor to generate a reference comparison.',
           style: TextStyle(
-            color: Color(0xFF64748B),
+            color: Color(0xFF94A3B8),
             fontSize: 13,
             fontStyle: FontStyle.italic,
           ),

@@ -116,203 +116,218 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
       child: SafeArea(
         child: Column(
           children: [
-            // Header
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: Color(0xFF1E293B))),
-              ),
-              child: Row(
-                children: [
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '📓 Lessons Learned Notebook',
-                          style: TextStyle(
-                            color: Color(0xFFFBBF24),
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 2),
-                        Text(
-                          'Saved patterns, idioms, and grammar takeaways',
-                          style: TextStyle(
-                            color: Color(0xFF94A3B8),
-                            fontSize: 11,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  OutlinedButton(
-                    onPressed: _exportMarkdown,
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFFE2E8F0),
-                      side: const BorderSide(color: Color(0xFF334155)),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      visualDensity: VisualDensity.compact,
-                    ),
-                    child: const Text('⬇ .MD', style: TextStyle(fontSize: 11)),
-                  ),
-                  const SizedBox(width: 6),
-                  OutlinedButton(
-                    onPressed: _exportAnkiCSV,
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFFE2E8F0),
-                      side: const BorderSide(color: Color(0xFF334155)),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      visualDensity: VisualDensity.compact,
-                    ),
-                    child: const Text('⬇ Anki', style: TextStyle(fontSize: 11)),
-                  ),
-                ],
-              ),
-            ),
-
-            // Manual Add Collapsible Section
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: const BoxDecoration(
-                color: Color(0xFF151F32),
-                border: Border(bottom: BorderSide(color: Color(0xFF1E293B))),
-              ),
-              child: Column(
-                children: [
-                  InkWell(
-                    onTap: () =>
-                        setState(() => _isAddExpanded = !_isAddExpanded),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          '+ Add Manual Lesson / Rule',
-                          style: TextStyle(
-                            color: Color(0xFFFCD34D),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Icon(
-                          _isAddExpanded
-                              ? Icons.keyboard_arrow_up
-                              : Icons.keyboard_arrow_down,
-                          color: const Color(0xFF64748B),
-                          size: 18,
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (_isAddExpanded) ...[
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildMiniInput(
-                            _enController,
-                            'English trigger phrase...',
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _buildMiniInput(
-                            _topicController,
-                            'Category (e.g., Subjunctive)',
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildMiniInput(
-                            _wrongController,
-                            'Avoid / literal mistake...',
-                            textColor: const Color(0xFFFDA4AF),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _buildMiniInput(
-                            _rightController,
-                            'Natural Spanish phrasing...',
-                            textColor: const Color(0xFF6EE7B7),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    _buildMiniInput(
-                      _ruleController,
-                      'Core takeaway / grammar rule...',
-                      maxLines: 2,
-                    ),
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton(
-                        onPressed: _submitManualLesson,
-                        style: FilledButton.styleFrom(
-                          backgroundColor: const Color(0xFFF59E0B),
-                          foregroundColor: const Color(0xFF0F172A),
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                        ),
-                        child: const Text(
-                          'Save to Notebook',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-
-            // Lessons List
+            _buildHeader(),
+            // The manual-add form and the lesson cards share one scroll view
+            // so a 320x568 window at 1.6x text scale cannot overflow.
             Expanded(
-              child: widget.lessons.isEmpty
-                  ? const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(24),
-                        child: Text(
-                          'No lessons saved yet.\nClick "Save Lesson" on any AI critique card to build your personal Spanish study notebook.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Color(0xFF94A3B8),
-                            fontSize: 13,
-                            height: 1.5,
-                          ),
-                        ),
+              child: ListView(
+                padding: const EdgeInsets.only(bottom: 16),
+                children: [
+                  _buildManualAddSection(),
+                  if (widget.lessons.isEmpty)
+                    _buildEmptyState()
+                  else
+                    ...widget.lessons.map(
+                      (item) => Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                        child: _buildLessonCard(item),
                       ),
-                    )
-                  : ListView.separated(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: widget.lessons.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: 12),
-                      itemBuilder: (context, idx) {
-                        final item = widget.lessons[idx];
-                        return _buildLessonCard(item);
-                      },
                     ),
+                ],
+              ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    const Widget title = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '📓 Lessons Learned Notebook',
+          style: TextStyle(
+            color: Color(0xFFFBBF24),
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(height: 2),
+        Text(
+          'Saved patterns, idioms, and grammar takeaways',
+          style: TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+        ),
+      ],
+    );
+
+    final Widget actions = Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      children: [
+        OutlinedButton(
+          onPressed: _exportMarkdown,
+          style: OutlinedButton.styleFrom(
+            foregroundColor: const Color(0xFFE2E8F0),
+            side: const BorderSide(color: Color(0xFF334155)),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          ),
+          child: const Text('⬇ .MD', style: TextStyle(fontSize: 11)),
+        ),
+        OutlinedButton(
+          onPressed: _exportAnkiCSV,
+          style: OutlinedButton.styleFrom(
+            foregroundColor: const Color(0xFFE2E8F0),
+            side: const BorderSide(color: Color(0xFF334155)),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          ),
+          child: const Text('⬇ Anki', style: TextStyle(fontSize: 11)),
+        ),
+      ],
+    );
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: Color(0xFF1E293B))),
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Narrow phones (and large text scales) stack the export actions
+          // under the title instead of squeezing them into one row.
+          if (constraints.maxWidth < 400) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [title, const SizedBox(height: 12), actions],
+            );
+          }
+          return Row(
+            children: [
+              const Expanded(child: title),
+              const SizedBox(width: 8),
+              actions,
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildManualAddSection() {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: const BoxDecoration(
+        color: Color(0xFF151F32),
+        border: Border(bottom: BorderSide(color: Color(0xFF1E293B))),
+      ),
+      child: Column(
+        children: [
+          InkWell(
+            onTap: () => setState(() => _isAddExpanded = !_isAddExpanded),
+            child: Padding(
+              // Keeps the disclosure row at the 48dp minimum tap target.
+              padding: const EdgeInsets.symmetric(vertical: 15),
+              child: Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      '+ Add Manual Lesson / Rule',
+                      style: TextStyle(
+                        color: Color(0xFFFCD34D),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    _isAddExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    color: const Color(0xFF94A3B8),
+                    size: 18,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (_isAddExpanded) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildMiniInput(
+                    _enController,
+                    'English trigger phrase...',
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildMiniInput(
+                    _topicController,
+                    'Category (e.g., Subjunctive)',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildMiniInput(
+                    _wrongController,
+                    'Avoid / literal mistake...',
+                    textColor: const Color(0xFFFDA4AF),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildMiniInput(
+                    _rightController,
+                    'Natural Spanish phrasing...',
+                    textColor: const Color(0xFF6EE7B7),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            _buildMiniInput(
+              _ruleController,
+              'Core takeaway / grammar rule...',
+              maxLines: 2,
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: _submitManualLesson,
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFFF59E0B),
+                  foregroundColor: const Color(0xFF0F172A),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+                child: const Text(
+                  'Save to Notebook',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return const Padding(
+      padding: EdgeInsets.all(24),
+      child: Text(
+        'No lessons saved yet.\nClick "Save Lesson" on any AI critique card to build your personal Spanish study notebook.',
+        textAlign: TextAlign.center,
+        style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13, height: 1.5),
       ),
     );
   }
@@ -329,40 +344,53 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: const Color(0x22F59E0B),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0x4DF59E0B)),
-                ),
-                child: Text(
-                  item.topic,
-                  style: const TextStyle(
-                    color: Color(0xFFFBBF24),
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
+              Flexible(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0x22F59E0B),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0x4DF59E0B)),
+                  ),
+                  child: Text(
+                    item.topic,
+                    style: const TextStyle(
+                      color: Color(0xFFFBBF24),
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
+              const SizedBox(width: 8),
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     item.date,
                     style: const TextStyle(
-                      color: Color(0xFF64748B),
+                      color: Color(0xFF94A3B8),
                       fontSize: 11,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  InkWell(
-                    onTap: () => widget.onDeleteLesson(item.id),
-                    child: const Icon(
-                      Icons.delete_outline,
-                      size: 16,
-                      color: Color(0xFF94A3B8),
+                  const SizedBox(width: 4),
+                  SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: InkWell(
+                      onTap: () => widget.onDeleteLesson(item.id),
+                      child: const Center(
+                        child: Icon(
+                          Icons.delete_outline,
+                          size: 16,
+                          color: Color(0xFF94A3B8),
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -513,7 +541,7 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
       ),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: Color(0xFF64748B), fontSize: 11),
+        hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
         filled: true,
         fillColor: const Color(0xFF0F172A),
         contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
