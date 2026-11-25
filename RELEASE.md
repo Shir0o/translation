@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/Shir0o/translation/compare/v1.0.3...v1.1.0) (2026-11-25)
+
+
+### Features
+
+* **ui:** support adaptive light and dark themes and load audit fonts ([#8](https://github.com/Shir0o/translation/issues/8)) ([49ac10f](https://github.com/Shir0o/translation/commit/49ac10f396a8010083a38724aaa4cee0b4775c49))
+
 ## [1.0.3](https://github.com/Shir0o/translation/compare/v1.0.2...v1.0.3) (2026-11-19)
 
 
