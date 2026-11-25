@@ -9,6 +9,7 @@ import 'models/critique_model.dart';
 import 'models/lesson_model.dart';
 import 'services/ai_tutor_service.dart';
 import 'services/lessons_repository.dart';
+import 'ui/theme/app_palette.dart';
 import 'ui/widgets/critique_card_widget.dart';
 import 'ui/widgets/interactive_english_view.dart';
 import 'ui/widgets/lessons_drawer.dart';
@@ -28,15 +29,9 @@ class LingoDiffApp extends StatelessWidget {
     return MaterialApp(
       title: 'LingoDiff Studio',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0A0F1A),
-        fontFamily: '.AppleSystemUIFont',
-        colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF6366F1),
-          surface: Color(0xFF0F172A),
-        ),
-      ),
+      theme: buildLightTheme(),
+      darkTheme: buildDarkTheme(),
+      themeMode: ThemeMode.system,
       home: const WorkspaceScreen(),
     );
   }
@@ -381,12 +376,13 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
   /// of the body and wraps its children, so every action stays on screen and
   /// tappable from 320 px @ 1.6x up to 1440 px.
   Widget _buildHeader() {
+    final AppPalette palette = context.palette;
     return Container(
       key: const Key('workspace-header'),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: const BoxDecoration(
-        color: Color(0xFF0F172A),
-        border: Border(bottom: BorderSide(color: Color(0xFF1E293B))),
+      decoration: BoxDecoration(
+        color: palette.header,
+        border: Border(bottom: BorderSide(color: palette.border)),
       ),
       child: Center(
         child: ConstrainedBox(
@@ -407,6 +403,7 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
   }
 
   Widget _buildHeaderBrand() {
+    final AppPalette palette = context.palette;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -414,14 +411,14 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: const Color(0xFF4F46E5),
+            color: palette.primaryStrong,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: const Center(
+          child: Center(
             child: ExcludeSemantics(
               child: Icon(
                 Icons.compare_arrows_rounded,
-                color: Colors.white,
+                color: palette.textOnAccent,
                 size: 22,
               ),
             ),
@@ -434,7 +431,7 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
+            children: [
               Text(
                 'LingoDiff Studio',
                 maxLines: 2,
@@ -442,14 +439,14 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: palette.textStrong,
                 ),
               ),
               Text(
                 'EN → ES Side-by-Side Translation & AI Tutor',
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
+                style: TextStyle(fontSize: 11, color: palette.textMuted),
               ),
             ],
           ),
@@ -459,6 +456,7 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
   }
 
   Widget _buildHeaderActions() {
+    final AppPalette palette = context.palette;
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -484,9 +482,9 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
         OutlinedButton(
           onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
           style: _headerButtonStyle(
-            foregroundColor: const Color(0xFFFCD34D),
-            borderColor: const Color(0x66F59E0B),
-            backgroundColor: const Color(0x22F59E0B),
+            foregroundColor: palette.warningLabel,
+            borderColor: palette.warningSoftBorder,
+            backgroundColor: palette.warningSoft,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -503,13 +501,13 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF59E0B),
+                  color: palette.warning,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
                   '${_savedLessons.length}',
-                  style: const TextStyle(
-                    color: Color(0xFF0F172A),
+                  style: TextStyle(
+                    color: palette.onWarning,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                   ),
@@ -534,16 +532,17 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
   }
 
   /// Shared header action style: 48x48dp minimum tap target on every platform
-  /// and WCAG AA text contrast against the [Color(0xFF0F172A)] header.
+  /// and WCAG AA text contrast against the header surface.
   ButtonStyle _headerButtonStyle({
-    Color foregroundColor = const Color(0xFFE2E8F0),
-    Color borderColor = const Color(0xFF334155),
-    Color backgroundColor = const Color(0xFF1E293B),
+    Color? foregroundColor,
+    Color? borderColor,
+    Color? backgroundColor,
   }) {
+    final AppPalette palette = context.palette;
     return OutlinedButton.styleFrom(
-      foregroundColor: foregroundColor,
-      side: BorderSide(color: borderColor),
-      backgroundColor: backgroundColor,
+      foregroundColor: foregroundColor ?? palette.textBody,
+      side: BorderSide(color: borderColor ?? palette.borderStrong),
+      backgroundColor: backgroundColor ?? palette.surfaceRaised,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       minimumSize: const Size(48, 48),
       tapTargetSize: MaterialTapTargetSize.padded,
@@ -551,9 +550,10 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
   }
 
   Widget _buildWorkspacePanes() {
+    final AppPalette palette = context.palette;
     final panel1 = _buildPanelCard(
       title: '1. ORIGINAL ENGLISH',
-      titleColor: const Color(0xFF38BDF8),
+      titleColor: palette.info,
       trailing: _isEnglishInteractive
           ? Wrap(
               spacing: 8,
@@ -562,19 +562,19 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
               children: [
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
+                    horizontal: 10,
+                    vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0x3338BDF8),
+                    color: palette.infoSoft,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0x6638BDF8)),
+                    border: Border.all(color: palette.infoSoftBorder),
                   ),
-                  child: const Text(
+                  child: Text(
                     '🎯 Interactive Pointer Mode',
                     style: TextStyle(
-                      color: Color(0xFF38BDF8),
-                      fontSize: 11,
+                      color: palette.onInfoSoft,
+                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -582,15 +582,24 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                 InkWell(
                   onTap: () => setState(() => _isEnglishInteractive = false),
                   borderRadius: BorderRadius.circular(6),
-                  child: const Padding(
-                    // 48dp minimum tap target on touch devices.
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    child: Text(
-                      'Edit Source',
-                      style: TextStyle(
-                        color: Color(0xFF94A3B8),
-                        fontSize: 11,
-                        decoration: TextDecoration.underline,
+                  child: ConstrainedBox(
+                    // 48dp minimum tap target on touch devices, even with the
+                    // narrower real Roboto metrics.
+                    constraints: const BoxConstraints(
+                      minWidth: 48,
+                      minHeight: 48,
+                    ),
+                    child: Center(
+                      widthFactor: 1,
+                      heightFactor: 1,
+                      child: Text(
+                        'Edit Source',
+                        style: TextStyle(
+                          color: palette.textBody,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          decoration: TextDecoration.underline,
+                        ),
                       ),
                     ),
                   ),
@@ -610,14 +619,14 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
           : TextField(
               controller: _englishController,
               maxLines: null,
-              style: const TextStyle(
-                color: Color(0xFFF1F5F9),
+              style: TextStyle(
+                color: palette.textPrimary,
                 fontSize: 14,
                 height: 1.6,
               ),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Paste the original English paragraph here...',
-                hintStyle: TextStyle(color: Color(0xFF94A3B8)),
+                hintStyle: TextStyle(color: palette.textMuted),
                 border: InputBorder.none,
               ),
             ),
@@ -625,22 +634,18 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
 
     final panel2 = _buildPanelCard(
       title: '2. YOUR SPANISH TRANSLATION',
-      titleColor: const Color(0xFF34D399),
-      trailing: const Text(
+      titleColor: palette.success,
+      trailing: Text(
         'Type manually',
-        style: TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+        style: TextStyle(color: palette.textMuted, fontSize: 11),
       ),
       child: TextField(
         controller: _userSpanishController,
         maxLines: null,
-        style: const TextStyle(
-          color: Color(0xFFF1F5F9),
-          fontSize: 14,
-          height: 1.6,
-        ),
-        decoration: const InputDecoration(
+        style: TextStyle(color: palette.textPrimary, fontSize: 14, height: 1.6),
+        decoration: InputDecoration(
           hintText: 'Escribe tu traducción al español aquí...',
-          hintStyle: TextStyle(color: Color(0xFF94A3B8)),
+          hintStyle: TextStyle(color: palette.textMuted),
           border: InputBorder.none,
         ),
       ),
@@ -648,18 +653,23 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
 
     final panel3 = _buildPanelCard(
       title: '3. OFFICIAL / REFERENCE SPANISH TRANSLATION',
-      titleColor: const Color(0xFFA78BFA),
+      titleColor: palette.violet,
       trailing: InkWell(
         onTap: () => setState(() => _isOfficialBlurred = !_isOfficialBlurred),
         borderRadius: BorderRadius.circular(6),
-        child: Padding(
-          // 48dp minimum tap target on touch devices.
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Text(
-            _isOfficialBlurred
-                ? '🙈 Blur while typing: On'
-                : '👁️ Blur while typing: Off',
-            style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+        child: ConstrainedBox(
+          // 48dp minimum tap target on touch devices, even with the narrower
+          // real Roboto metrics.
+          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+          child: Center(
+            widthFactor: 1,
+            heightFactor: 1,
+            child: Text(
+              _isOfficialBlurred
+                  ? '🙈 Blur while typing: On'
+                  : '👁️ Blur while typing: Off',
+              style: TextStyle(color: palette.textMuted, fontSize: 11),
+            ),
           ),
         ),
       ),
@@ -669,16 +679,16 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
             controller: _officialSpanishController,
             maxLines: null,
             style: TextStyle(
-              color: const Color(0xFFF1F5F9),
+              color: palette.textPrimary,
               fontSize: 14,
               height: 1.6,
               background: _isOfficialBlurred
-                  ? (Paint()..color = const Color(0xFF475569))
+                  ? (Paint()..color = palette.blurredFieldBackground)
                   : null,
             ),
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               hintText: 'Paste official Spanish translation here (or leave blank to let the AI generate one)...',
-              hintStyle: TextStyle(color: Color(0xFF94A3B8)),
+              hintStyle: TextStyle(color: palette.textMuted),
               border: InputBorder.none,
             ),
           ),
@@ -741,22 +751,25 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
     required Widget child,
     Widget? trailing,
   }) {
+    final AppPalette palette = context.palette;
     return Container(
       constraints: const BoxConstraints(minHeight: 180),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
+        color: palette.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF1E293B)),
+        border: Border.all(color: palette.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            decoration: const BoxDecoration(
-              color: Color(0xFF151F32),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-              border: Border(bottom: BorderSide(color: Color(0xFF1E293B))),
+            decoration: BoxDecoration(
+              color: palette.surfaceHeader,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12),
+              ),
+              border: Border(bottom: BorderSide(color: palette.border)),
             ),
             child: Wrap(
               spacing: 8,
@@ -784,12 +797,13 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
   }
 
   Widget _buildActionBar() {
+    final AppPalette palette = context.palette;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
+        color: palette.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF1E293B)),
+        border: Border.all(color: palette.border),
       ),
       child: Wrap(
         spacing: 12,
@@ -805,12 +819,13 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
               FilledButton.icon(
                 onPressed: _isLoading ? null : _runAIAnalysis,
                 style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF4F46E5),
-                  foregroundColor: Colors.white,
+                  backgroundColor: palette.primaryStrong,
+                  foregroundColor: palette.textOnAccent,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 18,
                     vertical: 12,
                   ),
+                  minimumSize: const Size(48, 48),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -824,13 +839,14 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
               OutlinedButton.icon(
                 onPressed: _runWordDiffOnly,
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFFE2E8F0),
-                  side: const BorderSide(color: Color(0xFF334155)),
-                  backgroundColor: const Color(0xFF1E293B),
+                  foregroundColor: palette.textBody,
+                  side: BorderSide(color: palette.borderStrong),
+                  backgroundColor: palette.surfaceRaised,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14,
                     vertical: 12,
                   ),
+                  minimumSize: const Size(48, 48),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -843,9 +859,7 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
               ),
               TextButton(
                 onPressed: _clearWorkspace,
-                style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF94A3B8),
-                ),
+                style: TextButton.styleFrom(foregroundColor: palette.textMuted),
                 child: const Text('Clear All', style: TextStyle(fontSize: 12)),
               ),
             ],
@@ -855,9 +869,9 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
             runSpacing: 6,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              _buildLegendDot(const Color(0xFFF43F5E), 'Grammar Error'),
-              _buildLegendDot(const Color(0xFFF59E0B), 'Unnatural / Literal'),
-              _buildLegendDot(const Color(0xFF10B981), 'Valid Alternative'),
+              _buildLegendDot(palette.error, 'Grammar Error'),
+              _buildLegendDot(palette.warning, 'Unnatural / Literal'),
+              _buildLegendDot(palette.success, 'Valid Alternative'),
             ],
           ),
         ],
@@ -866,6 +880,7 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
   }
 
   Widget _buildLegendDot(Color color, String label) {
+    final AppPalette palette = context.palette;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -878,7 +893,7 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
         Flexible(
           child: Text(
             label,
-            style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+            style: TextStyle(color: palette.textMuted, fontSize: 11),
           ),
         ),
       ],
@@ -886,30 +901,31 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
   }
 
   Widget _buildLoadingCard() {
+    final AppPalette palette = context.palette;
     return Container(
       padding: const EdgeInsets.all(28),
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
+        color: palette.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF1E293B)),
+        border: Border.all(color: palette.border),
       ),
-      child: const Column(
+      child: Column(
         children: [
-          CircularProgressIndicator(strokeWidth: 3, color: Color(0xFF6366F1)),
-          SizedBox(height: 14),
+          CircularProgressIndicator(strokeWidth: 3, color: palette.primary),
+          const SizedBox(height: 14),
           Text(
             'Analyzing your translation against the English source and official reference...',
             style: TextStyle(
-              color: Color(0xFFE2E8F0),
+              color: palette.textPrimary,
               fontSize: 13,
               fontWeight: FontWeight.w500,
             ),
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(
             'Mapping unnatural phrasings and grammar pointers back to English',
-            style: TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+            style: TextStyle(color: palette.textMuted, fontSize: 11),
           ),
         ],
       ),
@@ -917,6 +933,7 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
   }
 
   Widget _buildAiResultsSection() {
+    final AppPalette palette = context.palette;
     final ai = _aiResult!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -932,12 +949,12 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
               runSpacing: 6,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                const Text(
+                Text(
                   '🎯 AI Teaching Breakdown',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: palette.textStrong,
                   ),
                 ),
                 Container(
@@ -946,14 +963,14 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0x334F46E5),
+                    color: palette.primarySoft,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0x664F46E5)),
+                    border: Border.all(color: palette.primarySoftBorder),
                   ),
                   child: Text(
                     ai.overallScore,
-                    style: const TextStyle(
-                      color: Color(0xFFA5B4FC),
+                    style: TextStyle(
+                      color: palette.onPrimarySoft,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                     ),
@@ -962,15 +979,19 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
               ],
             ),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
-                color: const Color(0x330284C7),
+                color: palette.infoSoft,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0x660284C7)),
+                border: Border.all(color: palette.infoSoftBorder),
               ),
-              child: const Text(
+              child: Text(
                 '💡 Hover or click any card below to highlight the exact English phrase in Panel 1.',
-                style: TextStyle(color: Color(0xFF38BDF8), fontSize: 11),
+                style: TextStyle(
+                  color: palette.onInfoSoft,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ],
@@ -979,7 +1000,7 @@ class _WorkspaceScreenState extends ConsumerState<WorkspaceScreen> {
           const SizedBox(height: 6),
           Text(
             ai.summary,
-            style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+            style: TextStyle(color: palette.textMuted, fontSize: 13),
           ),
         ],
         const SizedBox(height: 16),

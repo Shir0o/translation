@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../models/ai_settings.dart';
+import '../theme/app_palette.dart';
 
 class SettingsDialog extends StatefulWidget {
   final AISettings initialSettings;
@@ -50,14 +51,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final AppPalette palette = context.palette;
     return Dialog(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: palette.surface,
       // Keeps the dialog inside 320x568 phone windows instead of being
       // clipped by the default 40px inset padding.
       insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: Color(0xFF1E293B)),
+        side: BorderSide(color: palette.border),
       ),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 460),
@@ -72,11 +74,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
               children: [
                 Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         '⚙️ AI Tutor Configuration',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: palette.textStrong,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -85,10 +87,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     IconButton(
                       onPressed: () => Navigator.of(context).pop(),
                       tooltip: 'Close settings',
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.close,
                         size: 18,
-                        color: Color(0xFF94A3B8),
+                        color: palette.textMuted,
                       ),
                     ),
                   ],
@@ -96,10 +98,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 const SizedBox(height: 16),
 
                 // Provider
-                const Text(
+                Text(
                   'PROVIDER',
                   style: TextStyle(
-                    color: Color(0xFF94A3B8),
+                    color: palette.textMuted,
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                   ),
@@ -108,19 +110,17 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF020617),
+                    color: palette.surfaceInset,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFF334155)),
+                    border: Border.all(color: palette.borderStrong),
                   ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<AIProvider>(
                       value: _provider,
-                      dropdownColor: const Color(0xFF0F172A),
+                      dropdownColor: palette.surface,
                       isExpanded: true,
-                      style: const TextStyle(
-                        color: Color(0xFFF1F5F9),
-                        fontSize: 13,
-                      ),
+                      style: Theme.of(context).textTheme.bodyMedium
+                          ?.copyWith(color: palette.textPrimary, fontSize: 13),
                       items: AIProvider.values.map((p) {
                         return DropdownMenuItem(
                           value: p,
@@ -134,10 +134,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 const SizedBox(height: 16),
 
                 // API Key
-                const Text(
+                Text(
                   'API KEY',
                   style: TextStyle(
-                    color: Color(0xFF94A3B8),
+                    color: palette.textMuted,
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                   ),
@@ -146,48 +146,45 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 TextField(
                   controller: _apiKeyController,
                   obscureText: true,
-                  style: const TextStyle(
-                    color: Color(0xFFF1F5F9),
-                    fontSize: 13,
-                  ),
+                  style: TextStyle(color: palette.textPrimary, fontSize: 13),
                   decoration: InputDecoration(
                     hintText: 'Paste your API key...',
-                    hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
+                    hintStyle: TextStyle(color: palette.textMuted),
                     filled: true,
-                    fillColor: const Color(0xFF020617),
+                    fillColor: palette.surfaceInset,
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 10,
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFF334155)),
+                      borderSide: BorderSide(color: palette.borderStrong),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFF334155)),
+                      borderSide: BorderSide(color: palette.borderStrong),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(
-                        color: Color(0xFF6366F1),
+                      borderSide: BorderSide(
+                        color: palette.primary,
                         width: 1.5,
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 4),
-                const Text(
+                Text(
                   'Stored locally on your Mac. Never sent anywhere except directly to the selected API provider.',
-                  style: TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+                  style: TextStyle(color: palette.textMuted, fontSize: 11),
                 ),
                 const SizedBox(height: 16),
 
                 // Model Name
-                const Text(
+                Text(
                   'MODEL NAME',
                   style: TextStyle(
-                    color: Color(0xFF94A3B8),
+                    color: palette.textMuted,
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                   ),
@@ -195,29 +192,26 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 const SizedBox(height: 6),
                 TextField(
                   controller: _modelController,
-                  style: const TextStyle(
-                    color: Color(0xFFF1F5F9),
-                    fontSize: 13,
-                  ),
+                  style: TextStyle(color: palette.textPrimary, fontSize: 13),
                   decoration: InputDecoration(
                     filled: true,
-                    fillColor: const Color(0xFF020617),
+                    fillColor: palette.surfaceInset,
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 10,
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFF334155)),
+                      borderSide: BorderSide(color: palette.borderStrong),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFF334155)),
+                      borderSide: BorderSide(color: palette.borderStrong),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(
-                        color: Color(0xFF6366F1),
+                      borderSide: BorderSide(
+                        color: palette.primary,
                         width: 1.5,
                       ),
                     ),
@@ -234,7 +228,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: TextButton.styleFrom(
-                        foregroundColor: const Color(0xFF94A3B8),
+                        foregroundColor: palette.textMuted,
                       ),
                       child: const Text('Cancel'),
                     ),
@@ -249,7 +243,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         Navigator.of(context).pop();
                       },
                       style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF6366F1),
+                        backgroundColor: palette.primaryStrong,
+                        foregroundColor: palette.textOnAccent,
+                        minimumSize: const Size(48, 48),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),

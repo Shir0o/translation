@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/lesson_model.dart';
 import '../../services/lessons_repository.dart';
+import '../theme/app_palette.dart';
 
 class LessonsDrawer extends StatefulWidget {
   final List<LessonItem> lessons;
@@ -108,8 +109,9 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    final AppPalette palette = context.palette;
     return Drawer(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: palette.surface,
       width: MediaQuery.sizeOf(context).width < 540
           ? MediaQuery.sizeOf(context).width * 0.9
           : 500,
@@ -143,21 +145,22 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
   }
 
   Widget _buildHeader() {
-    const Widget title = Column(
+    final AppPalette palette = context.palette;
+    final Widget title = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           '📓 Lessons Learned Notebook',
           style: TextStyle(
-            color: Color(0xFFFBBF24),
+            color: palette.warningHeading,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
         ),
-        SizedBox(height: 2),
+        const SizedBox(height: 2),
         Text(
           'Saved patterns, idioms, and grammar takeaways',
-          style: TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+          style: TextStyle(color: palette.textMuted, fontSize: 11),
         ),
       ],
     );
@@ -169,8 +172,9 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
         OutlinedButton(
           onPressed: _exportMarkdown,
           style: OutlinedButton.styleFrom(
-            foregroundColor: const Color(0xFFE2E8F0),
-            side: const BorderSide(color: Color(0xFF334155)),
+            foregroundColor: palette.textBody,
+            side: BorderSide(color: palette.borderStrong),
+            minimumSize: const Size(48, 48),
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           ),
           child: const Text('⬇ .MD', style: TextStyle(fontSize: 11)),
@@ -178,8 +182,9 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
         OutlinedButton(
           onPressed: _exportAnkiCSV,
           style: OutlinedButton.styleFrom(
-            foregroundColor: const Color(0xFFE2E8F0),
-            side: const BorderSide(color: Color(0xFF334155)),
+            foregroundColor: palette.textBody,
+            side: BorderSide(color: palette.borderStrong),
+            minimumSize: const Size(48, 48),
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           ),
           child: const Text('⬇ Anki', style: TextStyle(fontSize: 11)),
@@ -189,8 +194,8 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFF1E293B))),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: palette.border)),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -204,7 +209,7 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
           }
           return Row(
             children: [
-              const Expanded(child: title),
+              Expanded(child: title),
               const SizedBox(width: 8),
               actions,
             ],
@@ -215,39 +220,45 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
   }
 
   Widget _buildManualAddSection() {
+    final AppPalette palette = context.palette;
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: const BoxDecoration(
-        color: Color(0xFF151F32),
-        border: Border(bottom: BorderSide(color: Color(0xFF1E293B))),
+      decoration: BoxDecoration(
+        color: palette.surfaceHeader,
+        border: Border(bottom: BorderSide(color: palette.border)),
       ),
       child: Column(
         children: [
           InkWell(
             onTap: () => setState(() => _isAddExpanded = !_isAddExpanded),
-            child: Padding(
-              // Keeps the disclosure row at the 48dp minimum tap target.
-              padding: const EdgeInsets.symmetric(vertical: 15),
-              child: Row(
-                children: [
-                  const Expanded(
-                    child: Text(
-                      '+ Add Manual Lesson / Rule',
-                      style: TextStyle(
-                        color: Color(0xFFFCD34D),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
+            child: ConstrainedBox(
+              // Keeps the disclosure row at the 48dp minimum tap target with
+              // the narrower real Roboto metrics.
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+              child: Center(
+                widthFactor: 1,
+                heightFactor: 1,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '+ Add Manual Lesson / Rule',
+                        style: TextStyle(
+                          color: palette.warningLabel,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                  ),
-                  Icon(
-                    _isAddExpanded
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
-                    color: const Color(0xFF94A3B8),
-                    size: 18,
-                  ),
-                ],
+                    Icon(
+                      _isAddExpanded
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
+                      color: palette.textMuted,
+                      size: 18,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -277,7 +288,7 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
                   child: _buildMiniInput(
                     _wrongController,
                     'Avoid / literal mistake...',
-                    textColor: const Color(0xFFFDA4AF),
+                    textColor: palette.onErrorSoft,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -285,7 +296,7 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
                   child: _buildMiniInput(
                     _rightController,
                     'Natural Spanish phrasing...',
-                    textColor: const Color(0xFF6EE7B7),
+                    textColor: palette.onSuccessSoft,
                   ),
                 ),
               ],
@@ -302,8 +313,9 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
               child: FilledButton(
                 onPressed: _submitManualLesson,
                 style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFFF59E0B),
-                  foregroundColor: const Color(0xFF0F172A),
+                  backgroundColor: palette.warning,
+                  foregroundColor: palette.onWarning,
+                  minimumSize: const Size(48, 48),
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(6),
@@ -322,23 +334,25 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
   }
 
   Widget _buildEmptyState() {
-    return const Padding(
-      padding: EdgeInsets.all(24),
+    final AppPalette palette = context.palette;
+    return Padding(
+      padding: const EdgeInsets.all(24),
       child: Text(
         'No lessons saved yet.\nClick "Save Lesson" on any AI critique card to build your personal Spanish study notebook.',
         textAlign: TextAlign.center,
-        style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13, height: 1.5),
+        style: TextStyle(color: palette.textMuted, fontSize: 13, height: 1.5),
       ),
     );
   }
 
   Widget _buildLessonCard(LessonItem item) {
+    final AppPalette palette = context.palette;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF020617),
+        color: palette.surfaceInset,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFF1E293B)),
+        border: Border.all(color: palette.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -353,14 +367,14 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0x22F59E0B),
+                    color: palette.warningSoft,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0x4DF59E0B)),
+                    border: Border.all(color: palette.warningSoftBorder),
                   ),
                   child: Text(
                     item.topic,
-                    style: const TextStyle(
-                      color: Color(0xFFFBBF24),
+                    style: TextStyle(
+                      color: palette.warningLabel,
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                     ),
@@ -373,10 +387,7 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
                 children: [
                   Text(
                     item.date,
-                    style: const TextStyle(
-                      color: Color(0xFF94A3B8),
-                      fontSize: 11,
-                    ),
+                    style: TextStyle(color: palette.textMuted, fontSize: 11),
                   ),
                   const SizedBox(width: 4),
                   SizedBox(
@@ -384,11 +395,11 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
                     height: 48,
                     child: InkWell(
                       onTap: () => widget.onDeleteLesson(item.id),
-                      child: const Center(
+                      child: Center(
                         child: Icon(
                           Icons.delete_outline,
                           size: 16,
-                          color: Color(0xFF94A3B8),
+                          color: palette.textMuted,
                         ),
                       ),
                     ),
@@ -406,25 +417,22 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0F172A),
+                      color: palette.surface,
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: const Color(0xFF1E293B)),
+                      border: Border.all(color: palette.border),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           '🇬🇧 English:',
-                          style: TextStyle(
-                            color: Color(0xFF38BDF8),
-                            fontSize: 10,
-                          ),
+                          style: TextStyle(color: palette.info, fontSize: 10),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           item.english,
-                          style: const TextStyle(
-                            color: Color(0xFFE2E8F0),
+                          style: TextStyle(
+                            color: palette.textBody,
                             fontSize: 11,
                           ),
                         ),
@@ -441,25 +449,22 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0F172A),
+                      color: palette.surface,
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: const Color(0xFF1E293B)),
+                      border: Border.all(color: palette.border),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           '❌ Avoid:',
-                          style: TextStyle(
-                            color: Color(0xFFFB7185),
-                            fontSize: 10,
-                          ),
+                          style: TextStyle(color: palette.error, fontSize: 10),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           item.userSpanish,
-                          style: const TextStyle(
-                            color: Color(0xFFFECDD3),
+                          style: TextStyle(
+                            color: palette.onErrorSoft,
                             fontSize: 11,
                             decoration: TextDecoration.lineThrough,
                           ),
@@ -474,25 +479,25 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0F172A),
+                      color: palette.surface,
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: const Color(0xFF1E293B)),
+                      border: Border.all(color: palette.border),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           '✅ Natural:',
                           style: TextStyle(
-                            color: Color(0xFF34D399),
+                            color: palette.success,
                             fontSize: 10,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           item.naturalSpanish,
-                          style: const TextStyle(
-                            color: Color(0xFFA7F3D0),
+                          style: TextStyle(
+                            color: palette.onSuccessSoft,
                             fontSize: 11,
                           ),
                         ),
@@ -505,14 +510,14 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
           ),
           if (item.rule.isNotEmpty) ...[
             const SizedBox(height: 8),
-            RichText(
-              text: TextSpan(
-                style: const TextStyle(color: Color(0xFFCBD5E1), fontSize: 12),
+            Text.rich(
+              TextSpan(
+                style: TextStyle(color: palette.textBody, fontSize: 12),
                 children: [
-                  const TextSpan(
+                  TextSpan(
                     text: 'Rule: ',
                     style: TextStyle(
-                      color: Color(0xFFFCD34D),
+                      color: palette.warningLabel,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -532,26 +537,28 @@ class _LessonsDrawerState extends State<LessonsDrawer> {
     Color? textColor,
     int maxLines = 1,
   }) {
+    final AppPalette palette = context.palette;
     return TextField(
       controller: controller,
       maxLines: maxLines,
-      style: TextStyle(
-        color: textColor ?? const Color(0xFFF1F5F9),
-        fontSize: 12,
-      ),
+      style: TextStyle(color: textColor ?? palette.textPrimary, fontSize: 12),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+        hintStyle: TextStyle(color: palette.textMuted, fontSize: 11),
         filled: true,
-        fillColor: const Color(0xFF0F172A),
+        fillColor: palette.surfaceInset,
         contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(6),
-          borderSide: const BorderSide(color: Color(0xFF334155)),
+          borderSide: BorderSide(color: palette.borderStrong),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(6),
-          borderSide: const BorderSide(color: Color(0xFF334155)),
+          borderSide: BorderSide(color: palette.borderStrong),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(6),
+          borderSide: BorderSide(color: palette.primary, width: 1.5),
         ),
       ),
     );

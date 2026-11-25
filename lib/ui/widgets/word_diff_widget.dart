@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/diff/word_diff.dart';
+import '../theme/app_palette.dart';
 
 class WordDiffWidget extends StatelessWidget {
   final List<DiffChunk> diffChunks;
@@ -14,19 +15,21 @@ class WordDiffWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppPalette palette = context.palette;
+
     if (!hasOfficialText) {
       return Container(
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF0F172A),
+          color: palette.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFF1E293B)),
+          border: Border.all(color: palette.border),
         ),
-        child: const Text(
+        child: Text(
           'No official reference text provided. Paste an official translation in Panel 3 or run AI Tutor to generate a reference comparison.',
           style: TextStyle(
-            color: Color(0xFF94A3B8),
+            color: palette.textMuted,
             fontSize: 13,
             fontStyle: FontStyle.italic,
           ),
@@ -38,9 +41,9 @@ class WordDiffWidget extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
+        color: palette.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF1E293B)),
+        border: Border.all(color: palette.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,10 +54,10 @@ class WordDiffWidget extends StatelessWidget {
             alignment: WrapAlignment.spaceBetween,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              const Text(
+              Text(
                 'VISUAL WORD DIFF (YOUR SPANISH VS. OFFICIAL REFERENCE)',
                 style: TextStyle(
-                  color: Color(0xFF94A3B8),
+                  color: palette.textMuted,
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.8,
@@ -66,36 +69,37 @@ class WordDiffWidget extends StatelessWidget {
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
+                      horizontal: 10,
+                      vertical: 5,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0x33F43F5E),
+                      color: palette.diffRemovedBackground,
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Your phrasing removed',
                       style: TextStyle(
-                        color: Color(0xFFFDA4AF),
-                        fontSize: 11,
+                        color: palette.diffRemovedText,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
                         decoration: TextDecoration.lineThrough,
                       ),
                     ),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
+                      horizontal: 10,
+                      vertical: 5,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0x3310B981),
+                      color: palette.diffAddedBackground,
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Official phrasing added',
                       style: TextStyle(
-                        color: Color(0xFF6EE7B7),
-                        fontSize: 11,
+                        color: palette.diffAddedText,
+                        fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -109,9 +113,9 @@ class WordDiffWidget extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFF020617),
+              color: palette.surfaceInset,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFF1E293B)),
+              border: Border.all(color: palette.border),
             ),
             child: SelectableText.rich(
               TextSpan(
@@ -119,9 +123,9 @@ class WordDiffWidget extends StatelessWidget {
                   if (chunk.isAdded) {
                     return TextSpan(
                       text: chunk.text,
-                      style: const TextStyle(
-                        color: Color(0xFF6EE7B7),
-                        backgroundColor: Color(0x4410B981),
+                      style: TextStyle(
+                        color: palette.diffAddedText,
+                        backgroundColor: palette.diffAddedBackground,
                         fontWeight: FontWeight.w600,
                         fontSize: 15,
                         height: 1.8,
@@ -130,9 +134,9 @@ class WordDiffWidget extends StatelessWidget {
                   } else if (chunk.isRemoved) {
                     return TextSpan(
                       text: chunk.text,
-                      style: const TextStyle(
-                        color: Color(0xFFFDA4AF),
-                        backgroundColor: Color(0x44F43F5E),
+                      style: TextStyle(
+                        color: palette.diffRemovedText,
+                        backgroundColor: palette.diffRemovedBackground,
                         decoration: TextDecoration.lineThrough,
                         fontSize: 15,
                         height: 1.8,
@@ -141,8 +145,8 @@ class WordDiffWidget extends StatelessWidget {
                   } else {
                     return TextSpan(
                       text: chunk.text,
-                      style: const TextStyle(
-                        color: Color(0xFFE2E8F0),
+                      style: TextStyle(
+                        color: palette.diffPlainText,
                         fontSize: 15,
                         height: 1.8,
                       ),
