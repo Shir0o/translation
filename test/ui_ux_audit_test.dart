@@ -27,14 +27,17 @@
 // normal run, a missing baseline prints a skip notice instead of creating a
 // file, so a fresh checkout still reports the behavioural audit.
 //
-// Font-rendering constraints
-// --------------------------
-// `flutter test` only ships the Ahem test font, and the app asks for the local
-// ".AppleSystemUIFont" family, which is not registered in the test font
-// manager. Text therefore renders as solid Ahem blocks in the goldens. That is
-// intentional: goldens assert layout geometry, wrapping, density and colour,
-// not glyph shapes. Ahem is also wider than the real system font, which makes
-// these tests a useful worst case for overflow.
+// Font rendering
+// ---------------
+// `flutter test` only ships Ahem (solid blocks, wider than any real text face)
+// and the app asks for the local ".AppleSystemUIFont" family, which is not
+// registered in the test font manager. Without help, every golden would be a
+// grid of black rectangles. `_loadAuditFonts` therefore registers the Flutter
+// SDK's own Roboto Regular/Medium/Bold faces under both 'Roboto' and
+// '.AppleSystemUIFont' plus MaterialIcons-Regular.otf as 'MaterialIcons' from
+// `bin/cache/artifacts/material_fonts` in `setUp()`. Goldens and contrast
+// measurements now see real glyph metrics, real icon glyphs and the same
+// narrower-than-Ahem advance widths the macOS build renders.
 //
 // macOS desktop notes
 // -------------------
@@ -55,13 +58,16 @@
 // * The app's Cmd+Enter shortcut is exercised on the desktop matrix; it opens
 //   the settings dialog when the demo is loaded but no API key is set.
 //
-// Theme note (audit finding)
-// --------------------------
-// `LingoDiffApp` hard-codes a dark `ThemeData` and exposes no `ThemeMode` or
-// light theme. The "light" matrices therefore put the platform in light mode
-// while the app keeps rendering its dark-only palette, so the light and dark
-// goldens are visually identical. The distinct captures remain in place so a
-// future light theme is audited automatically.
+// Theme note
+// ----------
+// `LingoDiffApp` wires `theme: buildLightTheme()`, `darkTheme:
+// buildDarkTheme()` and `themeMode: ThemeMode.system`, with every colour read
+// from the `AppPalette` theme extension. The "light" matrices therefore render
+// the studio-paper palette (light scaffold, dark text) and the "dark" matrices
+// keep the original slate-navy/indigo palette. `_expectThemeBrightness` asserts
+// the scaffold/surface luminance is actually > 0.5 in light mode and < 0.5 in
+// dark mode, so a light golden can never silently render the dark palette
+// again.
 
 import 'dart:io';
 
@@ -71,6 +77,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:translation/main.dart';
+import 'package:translation/ui/theme/app_palette.dart';
 
 /// Phone matrix size (iPhone-class logical pixels).
 const Size _phoneSize = Size(390, 844);
@@ -90,8 +97,9 @@ const String _goldenDir = 'test/goldens';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  setUp(() {
+  setUp(() async {
     SharedPreferences.setMockInitialValues({});
+    await _loadAuditFonts();
   });
 
   // -------------------------------------------------------------------------
@@ -103,6 +111,7 @@ void main() {
       _setPlatformBrightness(tester, Brightness.light);
 
       await _pumpApp(tester);
+      _expectThemeBrightness(tester, Brightness.light);
       await _auditState(tester, 'phone light');
 
       await _expectAuditGolden(tester, 'audit_phone_light.png');
@@ -113,6 +122,7 @@ void main() {
       _setPlatformBrightness(tester, Brightness.dark);
 
       await _pumpApp(tester);
+      _expectThemeBrightness(tester, Brightness.dark);
       await _auditState(tester, 'phone dark');
 
       await _expectAuditGolden(tester, 'audit_phone_dark.png');
@@ -472,6 +482,133 @@ void main() {
 // ---------------------------------------------------------------------------
 // Harness helpers
 // ---------------------------------------------------------------------------
+
+/// Registers the Flutter SDK's real Roboto and Material Icons fonts for the
+/// current test process.
+///
+/// `flutter test` otherwise only provides Ahem, which renders every string as
+/// opaque blocks and reports Ahem's square advance widths. Roboto's Regular,
+/// Medium and Bold faces are registered under both 'Roboto' and the app's
+/// '.AppleSystemUIFont' family so the app's theme resolves real metrics and
+/// real medium/bold strokes; MaterialIcons makes `Icon` widgets draw their
+/// glyphs instead of empty boxes. Called from [setUp] so each widget test gets
+/// legible typography, icons and realistic (narrower) advance widths.
+Future<void> _loadAuditFonts() async {
+  final String? flutterRoot = _flutterRoot();
+  if (flutterRoot == null) {
+    debugPrint(
+      'AUDIT fonts: FLUTTER_ROOT is unavailable; falling back to Ahem metrics.',
+    );
+    return;
+  }
+
+  final String fontDir = <String>[
+    flutterRoot,
+    'bin',
+    'cache',
+    'artifacts',
+    'material_fonts',
+  ].join(Platform.pathSeparator);
+
+  // Register the real Regular/Medium/Bold faces so `FontWeight.w500`,
+  // `w600` and `bold` render their true stroke weights instead of falling back
+  // to a synthetic (or thin Regular) face. Thin synthetic strokes under
+  // 11-12px text are what the contrast histogram misreads as low luminance.
+  final List<String> robotoWeights = <String>[
+    '$fontDir${Platform.pathSeparator}Roboto-Regular.ttf',
+    '$fontDir${Platform.pathSeparator}Roboto-Medium.ttf',
+    '$fontDir${Platform.pathSeparator}Roboto-Bold.ttf',
+  ];
+  final String materialIcons =
+      '$fontDir${Platform.pathSeparator}MaterialIcons-Regular.otf';
+
+  await _registerFonts('Roboto', robotoWeights);
+  await _registerFonts('.AppleSystemUIFont', robotoWeights);
+  await _registerFont('MaterialIcons', materialIcons);
+}
+
+/// Best-effort lookup of the Flutter SDK that is running this test.
+String? _flutterRoot() {
+  final String? fromEnv = Platform.environment['FLUTTER_ROOT'];
+  if (fromEnv != null && fromEnv.isNotEmpty) return fromEnv;
+
+  // `flutter test` runs `<sdk>/bin/cache/dart-sdk/bin/dart`, so the SDK root is
+  // four directories above the resolved executable.
+  final File dart = File(Platform.resolvedExecutable);
+  final Directory dartSdkBin = dart.parent;
+  final Directory dartSdk = dartSdkBin.parent;
+  final Directory cache = dartSdk.parent;
+  final Directory bin = cache.parent;
+  final Directory root = bin.parent;
+  if (Directory(
+    '${root.path}${Platform.pathSeparator}bin'
+    '${Platform.pathSeparator}cache'
+    '${Platform.pathSeparator}artifacts'
+    '${Platform.pathSeparator}material_fonts',
+  ).existsSync()) {
+    return root.path;
+  }
+  return null;
+}
+
+Future<void> _registerFont(String family, String path) async {
+  await _registerFonts(family, <String>[path]);
+}
+
+/// Loads every existing file in [paths] as one family, so a single
+/// [FontLoader] carries Regular + Medium + Bold and Flutter can pick the face
+/// that matches the requested [FontWeight].
+Future<void> _registerFonts(String family, List<String> paths) async {
+  final FontLoader loader = FontLoader(family);
+  bool added = false;
+  for (final String path in paths) {
+    final File file = File(path);
+    if (!file.existsSync()) {
+      debugPrint(
+        'AUDIT fonts: "$path" is missing; "$family" weight stays unresolved.',
+      );
+      continue;
+    }
+    final Uint8List bytes = await file.readAsBytes();
+    loader.addFont(Future<ByteData>.value(ByteData.sublistView(bytes)));
+    added = true;
+  }
+  if (!added) {
+    debugPrint('AUDIT fonts: no faces found for "$family".');
+    return;
+  }
+  await loader.load();
+}
+
+/// Asserts the app resolved the theme for [brightness] and that its
+/// scaffold/background is genuinely light (> 0.5 luminance) or dark (< 0.5).
+void _expectThemeBrightness(WidgetTester tester, Brightness brightness) {
+  final BuildContext context = tester.element(find.byType(Scaffold).first);
+  final ThemeData theme = Theme.of(context);
+  final AppPalette? palette = theme.extension<AppPalette>();
+
+  expect(palette, isNotNull, reason: 'AppPalette theme extension is missing.');
+  expect(
+    theme.brightness,
+    brightness,
+    reason: 'ThemeMode.system did not follow the platform brightness.',
+  );
+  expect(palette!.brightness, brightness);
+  expect(theme.scaffoldBackgroundColor, palette.scaffold);
+
+  final bool isLight = brightness == Brightness.light;
+  final String mode = isLight ? 'light' : 'dark';
+  expect(
+    theme.scaffoldBackgroundColor.computeLuminance(),
+    isLight ? greaterThan(0.5) : lessThan(0.5),
+    reason: 'The $mode theme scaffold is not $mode enough to be legible.',
+  );
+  expect(
+    palette.surface.computeLuminance(),
+    isLight ? greaterThan(0.5) : lessThan(0.5),
+    reason: 'The $mode theme surface is not $mode enough to be legible.',
+  );
+}
 
 /// Sets a deterministic logical surface plus device pixel ratio and guarantees
 /// the host values are restored, even if an expectation fails.
